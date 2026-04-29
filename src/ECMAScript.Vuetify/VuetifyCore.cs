@@ -1,14 +1,18 @@
-namespace ECMAScript.Vue.Vuetify;
+namespace ECMAScript.Vuetify;
 
-[ECMAScriptModule("vuetify")]
+[ECMAScript("npm:vuetify")]
+[Description("@#")]
 public static class Vuetify
 {
-    [ECMAScriptName("createVuetify")]
+    [Description("@#createVuetify")]
     public extern static VuetifyPlugin CreateVuetify();
 
-    [ECMAScriptName("createVuetify")]
+    [Description("@#createVuetify")]
     public extern static VuetifyPlugin CreateVuetify(VuetifyOptions options);
 }
+
+[ECMAScript]
+public interface IVuetifyComponent : IVueComponent { }
 
 [ECMAScriptModule("vuetify")]
 public sealed class VuetifyPlugin : VuePlugin
@@ -132,20 +136,3 @@ public sealed record VuetifyDateOptions
     [Description("@#locale")]
     public string? Locale { get; init; }
 }
-
-[ECMAScriptModule("vuetify/components")]
-public abstract class VuetifyComponent : VueComponent
-{
-    protected VuetifyComponent()
-    {
-    }
-}
-
-[ECMAScriptModule("vuetify/directives")]
-public abstract class VuetifyDirective : VueDirective
-{
-    protected VuetifyDirective()
-    {
-    }
-}
-
