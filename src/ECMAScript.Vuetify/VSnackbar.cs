@@ -18,7 +18,22 @@ public sealed class VSnackbar : ComponentBase, IVueLibraryComponent
     public string? Color { get; set; }
 
     [Parameter]
-    public int Timeout { get; set; }
+    public string? Text { get; set; }
+
+    [Parameter]
+    public VuetifyBooleanStringValue? Timer { get; set; }
+
+    [Parameter]
+    public VueStringNumberValue? Timeout { get; set; }
+
+    [Parameter]
+    public VuetifyLocation? Location { get; set; }
+
+    [Parameter]
+    public VuetifyRoundedValue? Rounded { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object?>? AdditionalAttributes { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

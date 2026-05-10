@@ -1,4 +1,5 @@
 using ECMAScript.VueContract;
+using ECMAScript.VueContract.Descriptor;
 using Microsoft.AspNetCore.Components;
 
 namespace ECMAScript.Vuetify;
@@ -6,6 +7,8 @@ namespace ECMAScript.Vuetify;
 [VueLibraryComponent("vuetify/components", "VAutocomplete")]
 [VueLibraryStyle("vuetify/styles")]
 [VueLibraryPluginRequirement("vuetify")]
+[VueLibraryProp(nameof(SelectedValue), VuePropKind.Model, Name = "modelValue", AcceptsBinding = true)]
+[VueLibraryEmit(nameof(SelectedValueChanged), VueEmitKind.ModelUpdate, Name = "update:modelValue")]
 public sealed class VAutocomplete : ComponentBase, IVueLibraryComponent
 {
     [Parameter]
@@ -58,6 +61,12 @@ public sealed class VAutocomplete : ComponentBase, IVueLibraryComponent
 
     [Parameter]
     public EventCallback<string?> ModelValueChanged { get; set; }
+
+    [Parameter]
+    public VuetifySelectModelValue? SelectedValue { get; set; }
+
+    [Parameter]
+    public EventCallback<VuetifySelectModelValue?> SelectedValueChanged { get; set; }
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object?>? AdditionalAttributes { get; set; }

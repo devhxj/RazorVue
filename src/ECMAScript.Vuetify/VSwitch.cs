@@ -25,6 +25,9 @@ public sealed class VSwitch : ComponentBase, IVueLibraryComponent
     public bool Inset { get; set; }
 
     [Parameter]
+    public VuetifyBooleanStringValue? Loading { get; set; }
+
+    [Parameter]
     public VuetifyHideDetailsValue? HideDetails { get; set; }
 
     [Parameter]

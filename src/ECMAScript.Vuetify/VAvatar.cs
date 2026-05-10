@@ -15,7 +15,25 @@ public sealed class VAvatar : ComponentBase, IVueLibraryComponent
     public string? Image { get; set; }
 
     [Parameter]
-    public string? Size { get; set; }
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Parameter]
+    public VuetifyDensity? Density { get; set; }
+
+    [Parameter]
+    public VuetifyVariant? Variant { get; set; }
+
+    [Parameter]
+    public VueStringNumberValue? Size { get; set; }
+
+    [Parameter]
+    public VuetifyRoundedValue? Rounded { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object?>? AdditionalAttributes { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

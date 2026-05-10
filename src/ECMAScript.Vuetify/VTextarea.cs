@@ -28,7 +28,7 @@ public sealed class VTextarea : ComponentBase, IVueLibraryComponent
     public bool AutoGrow { get; set; }
 
     [Parameter]
-    public VueIntStringValue? Counter { get; set; }
+    public VuetifyCounterValue? Counter { get; set; }
 
     [Parameter]
     public VuetifyFieldVariant? Variant { get; set; }
@@ -40,7 +40,10 @@ public sealed class VTextarea : ComponentBase, IVueLibraryComponent
     public bool Disabled { get; set; }
 
     [Parameter]
-    public int? Rows { get; set; }
+    public VueStringNumberValue? Rows { get; set; }
+
+    [Parameter]
+    public VueStringNumberValue? MaxRows { get; set; }
 
     [Parameter]
     public string? ModelValue { get; set; }
