@@ -3,8 +3,13 @@ import { createVuetify } from "vuetify";
 import "vuetify/styles";
 import { assertHostRequirements, createTodoRootComponent } from "./runtime-common.js";
 
-export function mountTodoApp(TodoApp, hostRequirements, selector = "#app") {
+export function mountTodoConsumer(components, hostRequirements, selector = "#app") {
   assertHostRequirements(hostRequirements);
+
+  const TodoApp = components?.TodoApp;
+  if (typeof TodoApp !== "object" && typeof TodoApp !== "function") {
+    throw new Error("RazorVue Todo consumer expected a TodoApp component export.");
+  }
 
   const app = createApp(createTodoRootComponent(TodoApp));
   app.use(createVuetify());
@@ -13,5 +18,5 @@ export function mountTodoApp(TodoApp, hostRequirements, selector = "#app") {
 }
 
 export function mountRootComponent(rootComponent, hostRequirements, selector = "#app") {
-  return mountTodoApp(rootComponent, hostRequirements, selector);
+  return mountTodoConsumer({ TodoApp: rootComponent }, hostRequirements, selector);
 }

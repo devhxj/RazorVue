@@ -4,11 +4,11 @@
   "componentName": "TodoApp",
   "relativeSfcPath": "components/todo-app.vue",
   "descriptorHash": "CFA06F2B1992F6CC41900EDAEE989F6BAE551E116408F3D08572BBE46E88BA97",
-  "templateHash": "576056A027C643A025B0167368DD718AC1DFC43DFBD55BF0E1E0E34C388FA402",
-  "logicHash": "CE953F8F70EA24752DCB72EA445879CFEA984298BFE2A0717C4D8539D3FE31FA",
+  "templateHash": "9B32FEEEF5F760A2E22B4024317C35275CA75BCFD98DD1CD3D655C7E3654D931",
+  "logicHash": "E8597831B1442007A501BE095A453F816AFF8AC02105BEABCB56BBB7F85DFF87",
   "styleHash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
   "templateBlock": {
-    "textLength": 3622,
+    "textLength": 3687,
     "origins": [
       {
         "originKind": "Template",
@@ -27,7 +27,7 @@
   },
   "scriptSetupBlock": {
     "language": "ts",
-    "textLength": 1719,
+    "textLength": 941,
     "origins": [
       {
         "originKind": "Component",

@@ -12,8 +12,13 @@ const expectedTexts = [
   "Pinned"
 ];
 
-export async function runSsrSmoke(TodoApp, hostRequirements) {
+export async function runTodoConsumerSsr(components, hostRequirements) {
   assertHostRequirements(hostRequirements);
+
+  const TodoApp = components?.TodoApp;
+  if (typeof TodoApp !== "object" && typeof TodoApp !== "function") {
+    throw new Error("RazorVue Todo consumer expected a TodoApp component export.");
+  }
 
   const app = createSSRApp({
     render() {
@@ -47,4 +52,8 @@ export async function runSsrSmoke(TodoApp, hostRequirements) {
   }
 
   return html;
+}
+
+export async function runSsrSmoke(TodoApp, hostRequirements) {
+  return await runTodoConsumerSsr({ TodoApp }, hostRequirements);
 }

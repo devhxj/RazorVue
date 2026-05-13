@@ -4,11 +4,11 @@
   "componentName": "TodoSummaryCard",
   "relativeSfcPath": "components/todo-summary-card.vue",
   "descriptorHash": "70F8B3CCA999CA2D23DCF0ADDEA7DCA37AC80FBFF9E44271D795D09CCDAE2F89",
-  "templateHash": "3C748571BAFA789CD5786020CFFF49C080C4EAA4EEA297C4D66A545F26D5F107",
-  "logicHash": "4C5C01C83134E5DBF4F743748AA7415667B9142D2DA4E72F67BC4F5CC785974E",
+  "templateHash": "2000C0BD686EEF613BF6637F0529A89F31EC97CE3B5FC0B14D614C3969256252",
+  "logicHash": "AEA6674229E008F38FC9B1944A42A61A63EDC2C7610055084D5F12E5025E4CF0",
   "styleHash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
   "templateBlock": {
-    "textLength": 522,
+    "textLength": 512,
     "origins": [
       {
         "originKind": "Template",
@@ -27,7 +27,7 @@
   },
   "scriptSetupBlock": {
     "language": "ts",
-    "textLength": 518,
+    "textLength": 358,
     "origins": [
       {
         "originKind": "Component",

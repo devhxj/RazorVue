@@ -1,4 +1,4 @@
-// .deno-build/vue-feature-flags.mjs
+// .deno-build/pid-38648/vue-feature-flags.mjs
 globalThis.__VUE_OPTIONS_API__ = true;
 globalThis.__VUE_PROD_DEVTOOLS__ = false;
 globalThis.__VUE_PROD_HYDRATION_MISMATCH_DETAILS__ = false;
@@ -38014,7 +38014,7 @@ var VValidation = genericComponent()({
   }
 });
 
-// .deno-build/generated-browser/components/todo-summary-card.mjs
+// .deno-build/pid-38648/generated-browser/components/todo-summary-card.mjs
 var _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "todo-summary-card",
   props: {
@@ -38031,13 +38031,9 @@ var _sfc_main = /* @__PURE__ */ defineComponent({
     __expose();
     const props = __props;
     const emit2 = __emit;
-    const __jazorVueSfcBinding0 = computed2(() => "compact");
-    const __jazorVueSfcBinding1 = computed2(() => props.pinnedCount > 0);
     const __returned__ = {
       props,
       emit: emit2,
-      __jazorVueSfcBinding0,
-      __jazorVueSfcBinding1,
       get VCard() {
         return VCard;
       },
@@ -38080,7 +38076,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
       createVNode($setup["VCardText"], null, {
         default: withCtx(() => [
           createVNode($setup["VList"], {
-            density: $setup.__jazorVueSfcBinding0
+            density: "compact"
           }, {
             default: withCtx(() => [
               createVNode($setup["VListItem"], {
@@ -38101,7 +38097,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
               }, null, 8, [
                 "subtitle"
               ]),
-              $setup.__jazorVueSfcBinding1 ? (openBlock(), createBlock($setup["VListItem"], {
+              $setup.props.pinnedCount > 0 ? (openBlock(), createBlock($setup["VListItem"], {
                 key: 0,
                 title: "Pinned",
                 subtitle: $setup.props.pinnedText
@@ -38111,9 +38107,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
             ]),
             _: 1
             /* STABLE */
-          }, 8, [
-            "density"
-          ])
+          })
         ]),
         _: 1
         /* STABLE */
@@ -38124,9 +38118,8 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   });
 }
 _sfc_main.render = render;
-var todo_summary_card_default = _sfc_main;
 
-// .deno-build/generated-browser/components/todo-app.mjs
+// .deno-build/pid-38648/generated-browser/components/todo-app.mjs
 var _sfc_main2 = /* @__PURE__ */ defineComponent({
   __name: "todo-app",
   props: {
@@ -38153,30 +38146,10 @@ var _sfc_main2 = /* @__PURE__ */ defineComponent({
     __expose();
     const props = __props;
     const emit2 = __emit;
-    const __jazorVueSfcBinding0 = computed2(() => props.statusMessage !== null && props.statusMessage !== "");
-    const __jazorVueSfcBinding1 = computed2(() => `${props.totalCount} tasks in scope`);
-    const __jazorVueSfcBinding2 = computed2(() => `${props.completedCount} completed`);
-    const __jazorVueSfcBinding3 = computed2(() => `${props.openCount} still active`);
-    const __jazorVueSfcBinding4 = computed2(() => `${props.pinnedCount} pinned for focus`);
-    const __jazorVueSfcBinding5 = computed2(() => props.visibleCount === 0);
-    const __jazorVueSfcBinding6 = computed2(() => "info");
-    const __jazorVueSfcBinding7 = computed2(() => "tonal");
-    const __jazorVueSfcBinding8 = computed2(() => "comfortable");
-    const __jazorVueSfcBinding9 = computed2(() => props.tasks);
     const __returned__ = {
       props,
       emit: emit2,
-      __jazorVueSfcBinding0,
-      __jazorVueSfcBinding1,
-      __jazorVueSfcBinding2,
-      __jazorVueSfcBinding3,
-      __jazorVueSfcBinding4,
-      __jazorVueSfcBinding5,
-      __jazorVueSfcBinding6,
-      __jazorVueSfcBinding7,
-      __jazorVueSfcBinding8,
-      __jazorVueSfcBinding9,
-      TodoSummaryCardComponent: todo_summary_card_default,
+      TodoSummaryCardComponent: _sfc_main,
       get VAlert() {
         return VAlert;
       },
@@ -38361,7 +38334,7 @@ function render2(_ctx, _cache, $props, $setup, $data, $options) {
                                 _: 1
                                 /* STABLE */
                               }),
-                              $setup.__jazorVueSfcBinding0 ? (openBlock(), createElementBlock(
+                              $setup.props.statusMessage !== null && $setup.props.statusMessage !== "" ? (openBlock(), createElementBlock(
                                 "p",
                                 _hoisted_1,
                                 toDisplayString($setup.props.statusMessage),
@@ -38399,10 +38372,10 @@ function render2(_ctx, _cache, $props, $setup, $data, $options) {
                         completedCount: $setup.props.completedCount,
                         openCount: $setup.props.openCount,
                         pinnedCount: $setup.props.pinnedCount,
-                        totalText: $setup.__jazorVueSfcBinding1,
-                        completedText: $setup.__jazorVueSfcBinding2,
-                        openText: $setup.__jazorVueSfcBinding3,
-                        pinnedText: $setup.__jazorVueSfcBinding4
+                        totalText: `${$setup.props.totalCount} tasks in scope`,
+                        completedText: `${$setup.props.completedCount} completed`,
+                        openText: `${$setup.props.openCount} still active`,
+                        pinnedText: `${$setup.props.pinnedCount} pinned for focus`
                       }, null, 8, [
                         "totalCount",
                         "completedCount",
@@ -38448,23 +38421,20 @@ function render2(_ctx, _cache, $props, $setup, $data, $options) {
                           }),
                           createVNode($setup["VCardText"], null, {
                             default: withCtx(() => [
-                              $setup.__jazorVueSfcBinding5 ? (openBlock(), createBlock($setup["VAlert"], {
+                              $setup.props.visibleCount === 0 ? (openBlock(), createBlock($setup["VAlert"], {
                                 key: 0,
-                                type: $setup.__jazorVueSfcBinding6,
-                                variant: $setup.__jazorVueSfcBinding7,
+                                type: "info",
+                                variant: "tonal",
                                 text: "No tasks match the current filter."
-                              }, null, 8, [
-                                "type",
-                                "variant"
-                              ])) : (openBlock(), createBlock($setup["VList"], {
+                              })) : (openBlock(), createBlock($setup["VList"], {
                                 key: 1,
-                                density: $setup.__jazorVueSfcBinding8
+                                density: "comfortable"
                               }, {
                                 default: withCtx(() => [
                                   (openBlock(true), createElementBlock(
                                     Fragment,
                                     null,
-                                    renderList($setup.__jazorVueSfcBinding9, (item) => {
+                                    renderList($setup.props.tasks, (item) => {
                                       return openBlock(), createElementBlock(
                                         Fragment,
                                         null,
@@ -38498,9 +38468,7 @@ function render2(_ctx, _cache, $props, $setup, $data, $options) {
                                 ]),
                                 _: 1
                                 /* STABLE */
-                              }, 8, [
-                                "density"
-                              ]))
+                              }))
                             ]),
                             _: 1
                             /* STABLE */
@@ -38531,11 +38499,10 @@ function render2(_ctx, _cache, $props, $setup, $data, $options) {
   });
 }
 _sfc_main2.render = render2;
-var todo_app_default = _sfc_main2;
 
-// ../Todo.Host/wwwroot/jazor/__jazor/razorvue-host.mjs
+// ../jazor/__jazor/razorvue-host.mjs
 var razorVueHostAssemblyName = "Todo.Library";
-var razorVueHostGeneratedAtUtc = "2026-05-10T14:49:22.3127635Z";
+var razorVueHostGeneratedAtUtc = "2026-05-13T15:04:49.3822753Z";
 var razorVueStyles = Object.freeze([
   "vuetify/styles"
 ]);
@@ -38558,11 +38525,11 @@ var razorVueHostModules = Object.freeze([
       "vuetify"
     ],
     "descriptorHash": "CFA06F2B1992F6CC41900EDAEE989F6BAE551E116408F3D08572BBE46E88BA97",
-    "templateHash": "576056A027C643A025B0167368DD718AC1DFC43DFBD55BF0E1E0E34C388FA402",
-    "logicHash": "CE953F8F70EA24752DCB72EA445879CFEA984298BFE2A0717C4D8539D3FE31FA",
-    "contentHash": "9C648D1673583AA778B89B76E31C88840F837406932859A70E75EFC6108E6A24",
+    "templateHash": "9B32FEEEF5F760A2E22B4024317C35275CA75BCFD98DD1CD3D655C7E3654D931",
+    "logicHash": "E8597831B1442007A501BE095A453F816AFF8AC02105BEABCB56BBB7F85DFF87",
+    "contentHash": "8D3D00C6C3535B6D8EBA02B416904BB8A2F27A9ED7D3F5080B0A152BFB4054C7",
     "styleHash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
-    "hmrBoundaryKind": 2,
+    "hmrBoundaryKind": 1,
     "requiresHydration": false,
     "supportsSsr": true
   },
@@ -38581,11 +38548,11 @@ var razorVueHostModules = Object.freeze([
       "vuetify"
     ],
     "descriptorHash": "70F8B3CCA999CA2D23DCF0ADDEA7DCA37AC80FBFF9E44271D795D09CCDAE2F89",
-    "templateHash": "3C748571BAFA789CD5786020CFFF49C080C4EAA4EEA297C4D66A545F26D5F107",
-    "logicHash": "4C5C01C83134E5DBF4F743748AA7415667B9142D2DA4E72F67BC4F5CC785974E",
-    "contentHash": "CD47B1AEC985576981D5F67C9B32797193C26B4AE2C7CA776CEA4FA29B49512A",
+    "templateHash": "2000C0BD686EEF613BF6637F0529A89F31EC97CE3B5FC0B14D614C3969256252",
+    "logicHash": "AEA6674229E008F38FC9B1944A42A61A63EDC2C7610055084D5F12E5025E4CF0",
+    "contentHash": "1D423EAC7511F42D882857FE0FC749928F254BD5E2A5C55FFFC645867CE0300D",
     "styleHash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
-    "hmrBoundaryKind": 2,
+    "hmrBoundaryKind": 1,
     "requiresHydration": false,
     "supportsSsr": true
   }
@@ -38805,19 +38772,27 @@ function createTodoRootComponent(TodoApp, state = createTodoState()) {
 }
 
 // src/runtime-client.js
-function mountTodoApp(TodoApp, hostRequirements, selector = "#app") {
+function mountTodoConsumer(components, hostRequirements, selector = "#app") {
   assertHostRequirements(hostRequirements);
+  const TodoApp = components?.TodoApp;
+  if (typeof TodoApp !== "object" && typeof TodoApp !== "function") {
+    throw new Error("RazorVue Todo consumer expected a TodoApp component export.");
+  }
   const app = createApp(createTodoRootComponent(TodoApp));
   app.use(createVuetify());
   app.mount(selector);
   return app;
 }
-function mountRootComponent(rootComponent, hostRequirements, selector = "#app") {
-  return mountTodoApp(rootComponent, hostRequirements, selector);
-}
 
-// .deno-build/client-entry.mjs
-mountRootComponent(todo_app_default, razorVueHostRequirements);
+// .deno-build/pid-38648/client-entry.mjs
+var razorVueConsumerComponents = Object.freeze({
+  TodoApp: _sfc_main2
+});
+mountTodoConsumer(razorVueConsumerComponents, razorVueHostRequirements);
+export {
+  razorVueConsumerComponents,
+  razorVueHostRequirements
+};
 /*! Bundled license information:
 
 @vue/shared/dist/shared.esm-bundler.js:

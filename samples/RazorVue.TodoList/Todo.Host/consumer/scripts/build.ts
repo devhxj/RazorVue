@@ -1,10 +1,18 @@
 import { basename, join, relative } from "node:path";
-import { collectFiles, emptyDirectory, fileExists, prepareWorkspace, readText, writeText } from "./lib/pipeline.ts";
+import {
+  collectFiles,
+  copyDirectory,
+  emptyDirectory,
+  fileExists,
+  prepareWorkspace,
+  readText,
+  writeText
+} from "./lib/pipeline.ts";
 
 export async function runBuild(): Promise<void> {
   const workspace = await prepareWorkspace(true);
   await emptyDirectory(workspace.distRoot);
-  await Deno.mkdir(workspace.assetsDirectory, { recursive: true });
+  await Deno.mkdir(workspace.browserBundleDirectory, { recursive: true });
 
   const command = new Deno.Command(Deno.execPath(), {
     cwd: workspace.consumerRoot,
@@ -17,7 +25,7 @@ export async function runBuild(): Promise<void> {
       "--packages=bundle",
       "--sourcemap=linked",
       "--outdir",
-      workspace.assetsDirectory,
+      workspace.browserBundleDirectory,
       workspace.clientEntryPath
     ],
     stdin: "null",
@@ -29,12 +37,12 @@ export async function runBuild(): Promise<void> {
     throw new Error(new TextDecoder().decode(output.stderr).trim() || "deno bundle failed.");
   }
 
-  const entryFilePath = join(workspace.assetsDirectory, "client-entry.js");
+  const entryFilePath = join(workspace.browserBundleDirectory, "client-entry.js");
   if (!(await fileExists(entryFilePath))) {
     throw new Error(`deno bundle did not produce '${entryFilePath}'.`);
   }
 
-  const cssFiles = (await collectFiles(workspace.assetsDirectory))
+  const cssFiles = (await collectFiles(workspace.browserBundleDirectory))
     .filter((file) => file.endsWith(".css"))
     .map((file) => `./${relative(workspace.distRoot, file).replaceAll("\\", "/")}`)
     .sort((left, right) => left.localeCompare(right, "en"));
@@ -47,10 +55,11 @@ export async function runBuild(): Promise<void> {
     .replace(
       "    <!-- razorvue:script -->",
       `    <script type="module" src="./${relative(workspace.distRoot, entryFilePath).replaceAll("\\", "/")}"></script>`
-    );
+  );
 
   await writeText(join(workspace.distRoot, "index.html"), outputHtml);
-  console.log(`RazorVue Deno build emitted ${basename(entryFilePath)} and ${cssFiles.length} CSS asset(s).`);
+  await copyDirectory(workspace.browserBundleDirectory, workspace.hostBrowserBundleDirectory);
+  console.log(`RazorVue Deno build emitted /jazor/${basename(entryFilePath)} and ${cssFiles.length} CSS asset(s).`);
 }
 
 if (import.meta.main) {

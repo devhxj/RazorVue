@@ -1,8 +1,6 @@
 {
   "nodeModulesDir": "auto",
   "imports": {
-    "@vue/compiler-sfc": "npm:@vue/compiler-sfc@3.5.33",
-    "typescript": "npm:typescript@5.8.3",
     "vue": "npm:vue@3.5.13",
     "vue/server-renderer": "npm:@vue/server-renderer@3.5.13",
     "vuetify": "npm:vuetify@3.8.0",

@@ -8,7 +8,7 @@ async function runAll(): Promise<void> {
   await runBundleApiSmoke();
   await runBuild();
   await runBrowserSmoke();
-  console.log("RazorVue TodoList pure Deno pipeline passed.");
+  console.log("RazorVue TodoList colocated Deno pipeline passed.");
 }
 
 if (import.meta.main) {
