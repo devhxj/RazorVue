@@ -1,0 +1,55 @@
+<Project Sdk="MSTest.Sdk/4.1.0">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseVSTest>true</UseVSTest>
+    <RazorSgTestRoslynBinariesPath Condition="$([System.IO.Directory]::Exists('$([System.IO.Path]::GetFullPath('$(MSBuildSDKsPath)\..\Roslyn\bincore'))'))">$([System.IO.Path]::GetFullPath('$(MSBuildSDKsPath)\..\Roslyn\bincore'))</RazorSgTestRoslynBinariesPath>
+    <RazorSgTestRoslynBinariesPath Condition="'$(RazorSgTestRoslynBinariesPath)' == '' And '$(NETCoreSdkVersion)' != ''">$([System.IO.Path]::GetFullPath('$(ProgramFiles)\dotnet\sdk\$(NETCoreSdkVersion)\Roslyn\bincore'))</RazorSgTestRoslynBinariesPath>
+    <RazorSgTestSdkPath Condition="$([System.IO.Directory]::Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk.Razor'))">$(MSBuildSDKsPath)</RazorSgTestSdkPath>
+    <RazorSgTestSdkPath Condition="'$(RazorSgTestSdkPath)' == '' And '$(NETCoreSdkVersion)' != ''">$([System.IO.Path]::GetFullPath('$(ProgramFiles)\dotnet\sdk\$(NETCoreSdkVersion)\Sdks'))</RazorSgTestSdkPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="bin\**\*.cs;obj\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ECMAScript.Vuetify\ECMAScript.Vuetify.csproj" />
+    <ProjectReference Include="..\ECMAScript.Vue3\ECMAScript.Vue3.csproj" />
+    <ProjectReference Include="..\ECMAScript.VueContract\ECMAScript.VueContract.csproj" />
+    <ProjectReference Include="..\Jazor.Analyzer\Jazor.Analyzer.csproj" />
+    <ProjectReference Include="..\Jazor.RazorVue\Jazor.RazorVue.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CodeAnalysis">
+      <HintPath>$(RazorSgTestRoslynBinariesPath)\Microsoft.CodeAnalysis.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.CSharp">
+      <HintPath>$(RazorSgTestRoslynBinariesPath)\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Razor.Compiler">
+      <HintPath>$(RazorSgTestSdkPath)\Microsoft.NET.Sdk.Razor\source-generators\Microsoft.CodeAnalysis.Razor.Compiler.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="$(CoverletVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="MSTest.TestFramework" Version="4.2.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="MSTest.TestAdapter" Version="4.2.1" />
+  </ItemGroup>
+</Project>
