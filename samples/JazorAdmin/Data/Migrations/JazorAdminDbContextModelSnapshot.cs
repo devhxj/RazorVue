@@ -15,7 +15,7 @@ partial class JazorAdminDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20260805081749_InitialIdentityAndAuthorization";
+    public override string LastMigrationId => "20260806232403_ProductCenters";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -241,6 +241,124 @@ partial class JazorAdminDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("ResourceKey", "OperationKey");
 
                 b.ToTable("ResourceOperationGrants");
+            });
+
+        modelBuilder.Entity("JazorAdmin.Data.Schedule", b =>
+            {
+                b.Property<string>("Key")
+                    .HasMaxLength(64)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Cron")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Description")
+                    .IsRequired()
+                    .HasMaxLength(512)
+                    .HasColumnType("TEXT");
+
+                b.Property<bool>("Enabled")
+                    .HasColumnType("INTEGER");
+
+                b.Property<string>("LastMessage")
+                    .HasMaxLength(1000)
+                    .HasColumnType("TEXT");
+
+                b.Property<DateTimeOffset?>("LastRunAt")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("LastStatus")
+                    .HasMaxLength(32)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Key");
+
+                b.ToTable("Schedules");
+            });
+
+        modelBuilder.Entity("JazorAdmin.Data.ScheduleRun", b =>
+            {
+                b.Property<Guid>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("TEXT");
+
+                b.Property<DateTimeOffset?>("FinishedAt")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Message")
+                    .HasMaxLength(1000)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("ScheduleKey")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("TEXT");
+
+                b.Property<DateTimeOffset>("StartedAt")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Status")
+                    .IsRequired()
+                    .HasMaxLength(32)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Trigger")
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Id");
+
+                b.HasIndex("ScheduleKey", "StartedAt");
+
+                b.ToTable("ScheduleRuns");
+            });
+
+        modelBuilder.Entity("JazorAdmin.Data.Setting", b =>
+            {
+                b.Property<string>("Key")
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Description")
+                    .HasMaxLength(512)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Group")
+                    .IsRequired()
+                    .HasMaxLength(64)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Kind")
+                    .IsRequired()
+                    .HasMaxLength(16)
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Label")
+                    .IsRequired()
+                    .HasMaxLength(128)
+                    .HasColumnType("TEXT");
+
+                b.Property<DateTimeOffset>("UpdatedAt")
+                    .HasColumnType("TEXT");
+
+                b.Property<string>("Value")
+                    .IsRequired()
+                    .HasMaxLength(8000)
+                    .HasColumnType("TEXT");
+
+                b.HasKey("Key");
+
+                b.HasIndex("Group", "Key");
+
+                b.ToTable("Settings");
             });
 
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -668,6 +786,17 @@ partial class JazorAdminDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Role");
             });
 
+        modelBuilder.Entity("JazorAdmin.Data.ScheduleRun", b =>
+            {
+                b.HasOne("JazorAdmin.Data.Schedule", "Schedule")
+                    .WithMany("Runs")
+                    .HasForeignKey("ScheduleKey")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("Schedule");
+            });
+
         modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
             {
                 b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -772,6 +901,11 @@ partial class JazorAdminDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Grants");
 
                 b.Navigation("Memberships");
+            });
+
+        modelBuilder.Entity("JazorAdmin.Data.Schedule", b =>
+            {
+                b.Navigation("Runs");
             });
 
         modelBuilder.Entity("OpenIddict.EntityFrameworkCore.Models.OpenIddictEntityFrameworkCoreApplication", b =>
