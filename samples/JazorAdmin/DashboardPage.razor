@@ -1,0 +1,76 @@
+@* Summarizes the signed-in operator's real administration context. 首页概览当前登录用户的真实管理上下文。 *@
+@inherits AppComponentBase
+
+<section class="jazor-admin-overview" data-dashboard="administration">
+    <section class="jazor-admin-overview__metrics" aria-label="Administration overview">
+        <article class="jazor-admin-overview__metric">
+            <span>Organizations</span>
+            <strong>@(Session?.Organizations.Length ?? 0)</strong>
+            <small>Available in this session</small>
+        </article>
+        <article class="jazor-admin-overview__metric">
+            <span>Platform roles</span>
+            <strong>@(Session?.Roles.Length ?? 0)</strong>
+            <small>Assigned to the signed-in account</small>
+        </article>
+        <article class="jazor-admin-overview__metric">
+            <span>Current organization</span>
+            <strong>@(SelectedOrganization?.Code ?? "None")</strong>
+            <small>@(SelectedOrganization?.DisplayName ?? "Choose an organization from the header")</small>
+        </article>
+        <article class="jazor-admin-overview__metric">
+            <span>Session</span>
+            <strong>Active</strong>
+            <small>@Session?.Email</small>
+        </article>
+    </section>
+
+    <div class="jazor-admin-overview__grid">
+        <section class="jazor-admin-overview__panel" aria-labelledby="organization-access-title">
+            <header class="jazor-admin-overview__panel-header">
+                <div>
+                    <h2 id="organization-access-title">Organization access</h2>
+                    <p>Organizations available to the signed-in account</p>
+                </div>
+            </header>
+            @if (Session?.Organizations is { Length: > 0 } organizations)
+            {
+                <ul class="jazor-admin-overview__organization-list">
+                    @foreach (var organization in organizations)
+                    {
+                        <li class="@(organization.Id == SelectedOrganization?.Id ? "is-current" : string.Empty)">
+                            <span class="jazor-admin-overview__organization-code">@organization.Code</span>
+                            <span>@organization.DisplayName</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="jazor-admin-overview__empty">No organizations are assigned to this account.</p>
+            }
+        </section>
+
+        <section class="jazor-admin-overview__panel" aria-labelledby="access-profile-title">
+            <header class="jazor-admin-overview__panel-header">
+                <div>
+                    <h2 id="access-profile-title">Access profile</h2>
+                    <p>Platform-level roles provided by the current session</p>
+                </div>
+            </header>
+            @if (Session?.Roles is { Length: > 0 } roles)
+            {
+                <ul class="jazor-admin-overview__role-list">
+                    @foreach (var role in roles)
+                    {
+                        <li>@role</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="jazor-admin-overview__empty">No platform-level roles are assigned.</p>
+            }
+        </section>
+    </div>
+</section>

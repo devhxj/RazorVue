@@ -1,0 +1,32 @@
+<!doctype html>
+<!-- HTML 外壳模板 / HTML shell template - 服务端通过 token 替换注入元数据和资源 URL -->
+<html lang="zh-CN" data-theme="dark" data-wiki-path-base="__WIKI_PATH_BASE__">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>__WIKI_DOCUMENT_TITLE__</title>
+  <meta name="description" content="__WIKI_DOCUMENT_DESCRIPTION__" />
+  <meta name="robots" content="__WIKI_DOCUMENT_ROBOTS__" />
+  <link rel="canonical" href="__WIKI_DOCUMENT_CANONICAL_URL__" />
+  <meta property="og:title" content="__WIKI_OPEN_GRAPH_TITLE__" />
+  <meta property="og:description" content="__WIKI_OPEN_GRAPH_DESCRIPTION__" />
+  <meta property="og:url" content="__WIKI_OPEN_GRAPH_URL__" />
+  <meta name="twitter:title" content="__WIKI_TWITTER_TITLE__" />
+  <meta name="twitter:description" content="__WIKI_TWITTER_DESCRIPTION__" />
+  <link rel="icon" href="__WIKI_FAVICON_URL__" type="image/svg+xml" />
+  <link rel="stylesheet" href="__WIKI_SITE_CSS_URL__" />
+</head>
+<body>
+  <div id="app"></div>
+  <script type="importmap" nonce="__WIKI_SCRIPT_NONCE__">
+    {
+      "imports": {
+        "System/": "__WIKI_SYSTEM_IMPORT_BASE__",
+        "vue": "__WIKI_VENDOR_VUE_URL__",
+        "npm:vue@3": "__WIKI_VENDOR_VUE_URL__"
+      }
+    }
+  </script>
+  <script type="module" src="__WIKI_MAIN_MODULE_URL__"></script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+@inherits ComponentBase
+
+@{ JazorAdminStyles.EnsureLoaded(); }
+
+<ApplicationFrame Theme="@Theme" Language="@languageTag" Grayscale="@grayscale">
+    @if (sessionRestoring && currentRoute.Path != "/login" && currentRoute.Path != "/lock")
+    {
+        <main class="jazor-admin-session-state" data-session-state="restoring" aria-live="polite">
+            <span class="jazor-admin-session-state__spinner" aria-hidden="true"></span>
+            <span>Restoring session</span>
+        </main>
+    }
+    else if (currentRoute.Path == "/login" || currentRoute.Path == "/lock")
+    {
+        <main class="@(IsLoginPage ? "jazor-admin-access jazor-admin-access--login" : "jazor-admin-access jazor-admin-access--lock")"
+              data-access-page="@(IsLoginPage ? "login" : "lock")">
+            <section class="jazor-admin-access__panel">
+                <strong class="jazor-admin-access__brand">JazorAdmin</strong>
+                <h1>@Localization.Get(Language, IsLoginPage ? TextKey.LoginTitle : TextKey.LockTitle)</h1>
+                <p>@Localization.Get(Language, IsLoginPage ? TextKey.LoginSubtitle : TextKey.LockSubtitle)</p>
+
+                <form @onsubmit="@(IsLoginPage ? SignIn : Unlock)" @onsubmit:preventDefault>
+                    <label>
+                        @Localization.Get(Language, TextKey.Account)
+                        <input data-access-field="account"
+                               name="account"
+                               type="email"
+                               readonly="@(!IsLoginPage)"
+                               required
+                               @bind="loginAccount"
+                               @bind:event="oninput" />
+                    </label>
+                    <label>
+                        @Localization.Get(Language, TextKey.Password)
+                        @if (IsLoginPage)
+                        {
+                            <input data-access-field="password" name="password" type="password" required @bind="loginPassword" @bind:event="oninput" />
+                        }
+                        else
+                        {
+                            <input data-access-field="password" name="password" type="password" required @bind="unlockPassword" @bind:event="oninput" />
+                        }
+                    </label>
+                    <button type="submit" data-access-submit="@(IsLoginPage ? "login" : "lock")">
+                        @Localization.Get(Language, IsLoginPage ? TextKey.SignIn : TextKey.Unlock)
+                    </button>
+                    @if (accessError is not null)
+                    {
+                        <p class="jazor-admin-access__error" role="alert">@accessError</p>
+                    }
+                </form>
+            </section>
+        </main>
+    }
+    else if (!HasSession)
+    {
+        <main class="jazor-admin-session-state" data-session-state="anonymous" aria-live="polite">
+            <span>Redirecting to sign in</span>
+        </main>
+    }
+    else if (IsErrorRoute)
+    {
+        <ErrorPage Kind="@(IsInternalErrorPage ? ErrorKind.InternalServerError : ErrorKind.NotFound)"
+                             Title="@Localization.Get(Language, IsInternalErrorPage ? TextKey.InternalErrorTitle : TextKey.NotFoundTitle)"
+                             Description="@Localization.Get(Language, IsInternalErrorPage ? TextKey.InternalErrorDescription : TextKey.NotFoundDescription)"
+                             ActionText="@Localization.Get(Language, TextKey.ReturnHome)"
+                             Action="@ReturnHome" />
+    }
+    else
+    {
+        <TDesignLayout Mode="@LayoutMode"
+                          Title="JazorAdmin"
+                          Subtitle="Identity and access management"
+                          NavItems="@AdminRouteCatalog.BuildNavigation(LocalizedItems)"
+                          Collapsed="@collapsed"
+                          CollapsedChanged="@(value => collapsed = value)"
+                          CollapseLabel="@Localization.Get(Language, TextKey.CollapseSidebar)"
+                          ExpandLabel="@Localization.Get(Language, TextKey.ExpandSidebar)"
+                          SelectedKey="@SelectedKey"
+                          ExpandedKeys="@EffectiveExpandedKeys"
+                          ExpandedKeysChanged="@(value => expandedKeys = value)">
+            <HeaderActions>
+                <div class="jazor-admin__header-context">
+                    @if (organizations.Length > 0)
+                    {
+                        <label class="jazor-admin__organization-picker">
+                            <span>Organization</span>
+                            <select data-organization-picker=""
+                                    @bind="selectedOrganizationId">
+                                @foreach (var organization in organizations)
+                                {
+                                    <option value="@organization.Id">@organization.DisplayName</option>
+                                }
+                            </select>
+                        </label>
+                    }
+                    <label class="jazor-admin__preference">
+                        @Localization.Get(Language, TextKey.Theme)
+                        <select data-preference="theme" @bind="themeKey">
+                            <option value="system">System</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </label>
+                    <label class="jazor-admin__preference">
+                        @Localization.Get(Language, TextKey.Language)
+                        <select data-preference="language" @bind="languageTag">
+                            <option value="en-US">English</option>
+                            <option value="zh-CN">中文</option>
+                        </select>
+                    </label>
+                    <label class="jazor-admin__preference-toggle">
+                        <input type="checkbox" data-preference="grayscale" @bind="grayscale" />
+                        @Localization.Get(Language, TextKey.Grayscale)
+                    </label>
+                </div>
+            </HeaderActions>
+            <UserRegion>
+                <div class="jazor-admin__user-region" data-user-menu="">
+                    <span class="jazor-admin__user">@CurrentUserLabel</span>
+                    <button type="button" class="jazor-admin__access-command" data-access-command="lock" @onclick="OpenLockScreen">
+                        @Localization.Get(Language, TextKey.Lock)
+                    </button>
+                    <button type="button" class="jazor-admin__access-command" data-access-command="sign-out" @onclick="SignOut">
+                        @Localization.Get(Language, TextKey.SignOut)
+                    </button>
+                </div>
+            </UserRegion>
+            <ChildContent>
+                <TDesignPageContainer CssClass="@DashboardContainerClass"
+                                         Title="@GetSelectedPageTitle()"
+                                         Subtitle="@GetSelectedPageSubtitle()"
+                                         BreadcrumbItems="@GetSelectedBreadcrumbItems()"
+                                         Actions="@GetPageActions()">
+                    @if (IsOrganizationPage)
+                    {
+                        <OrganizationPage OrganizationId="@selectedOrganizationId"
+                                          View="@(IsOrganizationMembersPage ? OrganizationView.Members : OrganizationView.Structure)" />
+                    }
+                    else if (IsAuthorizationPage)
+                    {
+                        <AccessControlPage OrganizationId="@selectedOrganizationId"
+                                           View="@(IsAuthorizationResourcesPage ? AccessControlView.Resources : AccessControlView.Roles)" />
+                    }
+                    else if (IsAccountsPage)
+                    {
+                        <AccountPage />
+                    }
+                    else if (IsConfigurationPage)
+                    {
+                        <ConfigPage View="@(IsConfigurationScopesPage ? ConfigView.Scopes : ConfigView.Clients)" />
+                    }
+                    else
+                    {
+                        <DashboardPage Session="@session"
+                                       SelectedOrganization="@SelectedOrganization" />
+                    }
+                </TDesignPageContainer>
+            </ChildContent>
+        </TDesignLayout>
+    }
+</ApplicationFrame>

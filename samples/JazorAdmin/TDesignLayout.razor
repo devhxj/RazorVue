@@ -1,0 +1,78 @@
+@* Renders the fixed primary rail plus its scoped secondary navigation. 渲染固定一级 rail 与范围化二级导航。 *@
+@inherits AdminContentComponentBase
+
+<TLayout CssClass="@RootCssClass"
+         CssStyle="@CssStyle"
+         data-shell-region="layout"
+         data-shell-layout="@LayoutContractValue"
+         data-shell-collapsed="@Collapsed"
+         @attributes="AdditionalAttributes">
+    @if (IsSidebarLayout)
+    {
+        <TAside Width="@(Collapsed ? "64px" : "240px")"
+                data-shell-region="sidebar">
+            @if (Sidebar is not null)
+            {
+                @Sidebar
+            }
+            else
+            {
+                <div class="jazor-admin-tdesign-sidebar-shell">
+                    @SidebarRail
+
+                    @if (!Collapsed)
+                    {
+                        <div class="jazor-admin-tdesign-sidebar-shell__menu">
+                            <div class="jazor-admin-tdesign-sidebar-shell__brand">
+                                <span class="jazor-admin-tdesign-sidebar-shell__brand-mark" aria-hidden="true"></span>
+                                <span>@SecondaryTitle</span>
+                            </div>
+                            <TDesignSidebarMenu Items="@SecondaryNavItems"
+                                                Collapsed="false"
+                                                SelectedKey="@SelectedKey"
+                                                ExpandedKeys="@ExpandedKeys"
+                                                SelectedKeyChanged="@SelectedKeyChanged"
+                                                ExpandedKeysChanged="@ExpandedKeysChanged"
+                                                Logo="@Logo" />
+                        </div>
+                    }
+                </div>
+            }
+        </TAside>
+    }
+
+    <TLayout data-shell-region="main">
+        <THeader Height="64px" data-shell-region="header">
+            <div class='@("jazor-admin-tdesign-layout__header")'>
+                @if (IsSidebarLayout)
+                {
+                    <TButton Text="@EffectiveCollapseLabel"
+                             Variant="@TButtonVariant.Text"
+                             data-shell-command="toggle-sidebar"
+                             aria-label="@EffectiveCollapseLabel"
+                             title="@EffectiveCollapseLabel"
+                             aria-expanded="@(!Collapsed)"
+                             OnClick="@ToggleCollapsed" />
+                }
+
+                @if (Header is not null)
+                {
+                    @Header
+                }
+                else
+                {
+                    <TDesignHeaderBar Title="@Title"
+                                          Subtitle="@Subtitle"
+                                          Logo="@Logo"
+                                          Navigation="@HeaderNavigation"
+                                          Actions="@HeaderActions"
+                                          UserRegion="@UserRegion" />
+                }
+            </div>
+        </THeader>
+
+        <TContent data-shell-region="content">
+            @ChildContent
+        </TContent>
+    </TLayout>
+</TLayout>
