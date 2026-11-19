@@ -14,34 +14,16 @@ ordinary Razor authoring with typed TDesign controls for a task-board CRUD flow:
 - internal push/replace navigation with `NavigationOptions.ReplaceHistoryEntry`,
   `HistoryEntryState`, and `LocationChanged` subscription/disposal
 
-## Source build
+## Build and verify
 
-From the repository root, build against the source projects with isolated outputs:
+From the repository root, prepare the candidate packages and build the sample with an isolated NuGet cache.
 
-```text
-dotnet run --file samples/RazorVue.Authoring/build-local.cs -- --source-only --configuration Debug --work-root .tmp/authoring-local-build-debug
-```
+~~~text
+dotnet run --file scripts/csharp/pack-release.cs
+dotnet run --file samples/RazorVue.Authoring/verify-smoke.cs -- --configuration Release --package-output artifacts/packages
+~~~
 
-The generated Debug graph is written to `.tmp/authoring-local-build-debug/source-jazor`.
-The build record includes elapsed time and the authoring-source internal-symbol count.
-
-## Local package and Release proof
-
-The reproducible package lane packs only `Jazor`, `Jazor.Vue`, `ECMAScript.TDesign`, and
-`ECMAScript.Style` with `--skip-push`, builds an isolated package consumer, and materializes
-the Release browser closure:
-
-```text
-dotnet run --file samples/RazorVue.Authoring/build-local.cs -- --configuration Release --work-root .tmp/authoring-local-build
-dotnet run --file samples/RazorVue.Authoring/verify-smoke.cs -- --skip-build --work-root .tmp/authoring-local-build --package-output .tmp/nupkg-sample/RazorVue.Authoring
-```
-
-The first command produces local packages under `.tmp/nupkg-sample/RazorVue.Authoring`, a
-package-consumer build under `.tmp/authoring-local-build/consumer-build-out`, Debug artifacts
-under `.tmp/authoring-local-build/package-jazor`, and Release artifacts under
-`.tmp/authoring-local-build/release-jazor`. The second command checks manifests, modules,
-source maps, package nuspec IDs, vendor closure, and the absence of `node_modules`.
-
+The verification checks the Debug modules, source maps, Release bundle, and packaged runtime resources, then drives the SPA in Chrome.
 To include the browser mount in the same gate, omit `--skip-browser` (the default). Google Chrome
 is discovered automatically; set `RAZORVUE_BROWSER_EXE` or
 `RAZORVUE_BROWSER_PATH` to choose a specific executable.

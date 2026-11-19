@@ -20,5 +20,5 @@ dotnet run --file samples/ECMAScript.VueDataUi.Dashboard/build-local.cs
 
 ## 相关文档
 
-- [ECMAScript.VueDataUi](../../src/ECMAScript.VueDataUi/README.md)
-- [示例总览](../../docs/03-guides/examples.md)
+- [ECMAScript.VueDataUi](https://github.com/devhxj/Jazor/blob/main/src/ECMAScript.VueDataUi/README.md)
+- [示例总览](https://github.com/devhxj/Jazor/blob/main/docs/03-guides/examples.md)

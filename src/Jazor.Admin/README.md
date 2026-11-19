@@ -74,5 +74,5 @@ dotnet run --file samples/JazorAdmin/verify-smoke.cs -- --configuration Release
 ## 相关文档
 
 - [JazorAdmin 示例](../../samples/JazorAdmin/README.md)
-- [管理壳架构](../../docs/02-architecture/admin-shell.md)
-- [Razor-to-Vue](../../docs/02-architecture/razor-to-vue.md)
+- [管理壳架构](https://github.com/devhxj/Jazor/blob/main/docs/02-architecture/admin-shell.md)
+- [Razor-to-Vue](https://github.com/devhxj/Jazor/blob/main/docs/02-architecture/razor-to-vue.md)

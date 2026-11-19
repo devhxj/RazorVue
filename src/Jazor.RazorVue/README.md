@@ -52,5 +52,5 @@ dotnet test src/Jazor.RazorVue.Sg.Test/Jazor.RazorVue.Sg.Test.csproj --no-restor
 ## 相关文档
 
 - [Jazor.Vue](../Jazor.Vue/README.md)
-- [Razor-to-Vue](../../docs/02-architecture/razor-to-vue.md)
-- [产物管线](../../docs/02-architecture/artifact-pipeline.md)
+- [Razor-to-Vue](https://github.com/devhxj/Jazor/blob/main/docs/02-architecture/razor-to-vue.md)
+- [产物管线](https://github.com/devhxj/Jazor/blob/main/docs/02-architecture/artifact-pipeline.md)
