@@ -9,14 +9,14 @@ This repository maintains the Razor SDK integration, the Vue runtime bridges, an
 | Jazor.Vue | Jazor SDK and ECMAScript.Vue | NuGet availability |
 | --- | --- | --- |
 | 2.1.0-preview.5 | Jazor 2.1.0-preview.5 | Published as part of [Jazor preview 5](https://github.com/devhxj/Jazor/releases/tag/v2.1.0-preview.5). |
-| 2.1.0-preview.6 | Jazor and ECMAScript.Vue 2.1.0-preview.6 | First standalone release candidate. |
+| 2.1.0-preview.6 | Jazor and ECMAScript.Vue 2.1.0-preview.6 | [First standalone preview](https://github.com/devhxj/RazorVue/releases/tag/v2.1.0-preview.6). |
 
 A Razor authoring project references both Jazor and Jazor.Vue directly. Upgrade them together using the table. The shared Vue bindings now come from the transitive ECMAScript.Vue dependency. Vue ecosystem packages should use the SDK version in the same row.
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Jazor" Version="2.1.0-preview.5" />
-  <PackageReference Include="Jazor.Vue" Version="2.1.0-preview.5" PrivateAssets="all" />
+  <PackageReference Include="Jazor" Version="2.1.0-preview.6" />
+  <PackageReference Include="Jazor.Vue" Version="2.1.0-preview.6" PrivateAssets="all" />
 </ItemGroup>
 ```
 
