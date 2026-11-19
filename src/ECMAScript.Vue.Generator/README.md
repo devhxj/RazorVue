@@ -31,7 +31,7 @@ dotnet run --project src/ECMAScript.Vue.Generator -- authoring --check
 
 `authoring` 扫描当前 `ECMAScript.*` C# 声明，维护数值/union 参数的 XML 提示、嵌套 union
 的直接标量投影，以及 Number 分支缺少的强类型数值转换。转换输入来自 `ECMAScript.Number`
-已有隐式转换；共享 SDK 的声明快照位于 `upstream/jazor/<JazorSdkVersion>/`，随 SDK 版本更新。该快照只提供生成器所需的类型声明，不参与编译或打包。不引入 `object`、开放泛型或组件名名单。生成区域和 `data-authoring="types"`
+已有隐式转换；共享 SDK 的声明快照位于 `upstream/jazor-sdk/<JazorSdkVersion>/`，随 SDK 版本更新。该快照只提供生成器所需的类型声明，不参与编译或打包。不引入 `object`、开放泛型或组件名名单。生成区域和 `data-authoring="types"`
 说明由该命令维护；重复运行保留原文、换行和既有接口，`--check` 检测漂移。
 Element Plus、Vuetify、TDesign 生成器共享相同处理，Lucide 生成脚本最后执行该维护步骤。
 新增 numeric/union 绑定后运行这两个 authoring 命令即可；应用构建期间不扫描或重写源码。

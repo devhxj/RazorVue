@@ -1,0 +1,23 @@
+namespace ECMAScript;
+
+public readonly union ScrollIntoViewArg(bool, ScrollIntoViewOptions)
+{
+
+    /// <summary>读取 bool 分支；当前值不属于该分支时返回 null，不进行类型强制转换。</summary>
+public bool? AsBool => Value is bool value ? value : default(bool?);
+
+    /// <summary>读取 ScrollIntoViewOptions 分支；当前值不属于该分支时返回 null，不进行类型强制转换。</summary>
+public ScrollIntoViewOptions? AsScrollIntoViewOptions => Value is ScrollIntoViewOptions value ? value : default(ScrollIntoViewOptions?);
+
+    /// <summary>将 bool 保存为联合值的对应分支，保留输入值。</summary>
+    /// <param name="value">要保存到该分支的值。</param>
+    /// <returns>保存该分支值的联合值。</returns>
+public static implicit operator ScrollIntoViewArg(bool value)
+        => new(value);
+
+    /// <summary>将 ScrollIntoViewOptions 保存为联合值的对应分支，保留输入值。</summary>
+    /// <param name="value">要保存到该分支的值。</param>
+    /// <returns>保存该分支值的联合值。</returns>
+public static implicit operator ScrollIntoViewArg(ScrollIntoViewOptions value)
+        => new(value);
+}

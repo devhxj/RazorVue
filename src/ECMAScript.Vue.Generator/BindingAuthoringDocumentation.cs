@@ -24,7 +24,7 @@ internal sealed class BindingAuthoringDocumentation
         var props = System.Xml.Linq.XDocument.Load(Path.Combine(repository, "Directory.Build.props"));
         var version = props.Descendants("JazorSdkVersion").Single().Value;
         return Directory.EnumerateFiles(
-            Path.Combine(repository, "src", "ECMAScript.Vue.Generator", "upstream", "jazor", version),
+            Path.Combine(repository, "src", "ECMAScript.Vue.Generator", "upstream", "jazor-sdk", version),
             "*.cs.txt").Order(StringComparer.Ordinal);
     }
 

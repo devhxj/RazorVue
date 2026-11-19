@@ -33,6 +33,7 @@ foreach (var check in checks)
     catch (Exception exception)
     {
         checkResults.Add(new BindingCheckResult(check.Name, false, exception.Message));
+        Console.Error.WriteLine(exception.Message);
     }
 }
 
