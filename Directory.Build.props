@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <JazorSdkVersion Condition="'$(JazorSdkVersion)' == ''">2.1.0-preview.6</JazorSdkVersion>
-    <RazorVuePackageVersion Condition="'$(RazorVuePackageVersion)' == ''">2.1.0-preview.6</RazorVuePackageVersion>
+    <RazorVuePackageVersion Condition="'$(RazorVuePackageVersion)' == ''">2.1.0-preview.7</RazorVuePackageVersion>
     <AcornimaVersion>1.9.2</AcornimaVersion>
     <DecompilerVersion>11.2.0.10050</DecompilerVersion>
     <AngleSharpVersion>1.10.3</AngleSharpVersion>

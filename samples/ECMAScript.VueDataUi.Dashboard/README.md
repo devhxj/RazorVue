@@ -6,19 +6,20 @@
 
 - `RevenueDashboard.razor` 将 `VdDonut`、`VdGauge` 和 `VdSparkline` 放到固定高度容器中，并以 `Responsive = true` 使用 upstream resize 行为。
 - `RevenueDashboard.razor.cs` 只使用 `ECMAScript.VueDataUi` 的 typed dataset/config；没有 `object` 或 root `vue-data-ui` import。
-- `build-local.cs` 先在隔离目录打包 `Jazor`、`Jazor.Vue` 和 `ECMAScript.VueDataUi`，随后以 package consumer 方式构建并检查生成的图表 import、style 和 selected ESM entries。
+- `build-local.cs` 使用 `artifacts/packages/` 内的候选包构建样例，并检查生成的图表 import、style 和 ESM 入口。
 
 ## 构建
 
 在仓库根目录执行：
 
 ```bash
+dotnet run --file scripts/csharp/pack-release.cs
 dotnet run --file samples/ECMAScript.VueDataUi.Dashboard/build-local.cs
 ```
 
-临时 nupkg、NuGet cache 与生成 artifact 都在 `.tmp/`，不会写入 sample 的 tracked 源文件。
+候选包在 `artifacts/packages/`，样例的 NuGet cache 与生成产物在 `.tmp/`，不会写入 sample 的 tracked 源文件。
 
 ## 相关文档
 
-- [ECMAScript.VueDataUi](https://github.com/devhxj/Jazor/blob/main/src/ECMAScript.VueDataUi/README.md)
-- [示例总览](https://github.com/devhxj/Jazor/blob/main/docs/03-guides/examples.md)
+- [ECMAScript.VueDataUi](../../src/ECMAScript.VueDataUi/README.md)
+- [示例总览](../../README.md)

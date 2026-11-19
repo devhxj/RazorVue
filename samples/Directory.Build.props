@@ -5,7 +5,6 @@
     <!-- Samples consume the latest released Jazor package set. Local smoke scripts override this value. -->
     <JazorPackageVersion Condition="'$(JazorPackageVersion)' == ''">$(JazorSdkVersion)</JazorPackageVersion>
     <JazorPackageVersion Condition="'$(JazorPackageVersion)' == ''">2.1.0-preview.6</JazorPackageVersion>
-    <RazorVuePackageVersion Condition="'$(RazorVuePackageVersion)' == ''">2.1.0-preview.6</RazorVuePackageVersion>
     <!-- Samples exercise native-union public APIs directly and must compile in preview mode. -->
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
