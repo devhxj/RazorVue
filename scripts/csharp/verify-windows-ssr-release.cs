@@ -455,22 +455,21 @@ void AssertDetachedConsumer(string consumerRoot, string workRoot)
 {
     var hostProject = Path.Combine(consumerRoot, "Todo.Host", "Todo.Host.csproj");
     var projectText = File.ReadAllText(hostProject);
-        !projectText.Contains("PackageReference Include=\"Jazor\"", StringComparison.Ordinal))
+    if (!projectText.Contains("PackageReference Include=\"Jazor\"", StringComparison.Ordinal))
     {
         throw new InvalidOperationException("Copied Todo.Host does not expose the package-consumer configuration.");
     }
 
     var libraryProject = Path.Combine(consumerRoot, "Todo.Library", "Todo.Library.csproj");
     var libraryText = File.ReadAllText(libraryProject);
-        !libraryText.Contains("PackageReference Include=\"Jazor\"", StringComparison.Ordinal) ||
+    if (!libraryText.Contains("PackageReference Include=\"Jazor\"", StringComparison.Ordinal) ||
         !libraryText.Contains("PackageReference Include=\"Jazor.Vue\"", StringComparison.Ordinal))
     {
         throw new InvalidOperationException(
             "Copied Todo.Library must directly reference both Jazor and Jazor.Vue in package-consumer mode.");
     }
 
-    // Both projects express repository source references as ..\..\..\src; the consumer copy
-    // places them one directory deeper than Wiki, so that path must resolve to .tmp/src.
+    // A former source-relative reference would resolve to .tmp/src from this detached copy.
     var resolvedRelativeSourceRoot = Path.GetFullPath(Path.Combine(workRoot, "..", "src"));
     if (Directory.Exists(resolvedRelativeSourceRoot))
     {
