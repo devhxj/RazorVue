@@ -2,10 +2,15 @@
   <PropertyGroup>
     <JazorAnalyzerDirectory>$(NuGetPackageRoot)jazor/$(JazorSdkVersion)/tools/net11.0/analyzers/</JazorAnalyzerDirectory>
   </PropertyGroup>
-  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Jazor.RazorVue'">
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Jazor.RazorVue' or '$(MSBuildProjectName)' == 'ECMAScript.FilePond.Test' or '$(MSBuildProjectName)' == 'ECMAScript.VueDraggable.Test' or '$(MSBuildProjectName)' == 'ECMAScript.WangEditor.Test'">
     <Reference Include="Jazor.Common" HintPath="$(JazorAnalyzerDirectory)Jazor.Common.dll" />
     <Reference Include="Jazor.Compiler" HintPath="$(JazorAnalyzerDirectory)Jazor.Compiler.dll" />
     <Reference Include="ECMAScript.Contract" HintPath="$(JazorAnalyzerDirectory)ECMAScript.Contract.dll" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'ECMAScript.FilePond.Test' or '$(MSBuildProjectName)' == 'ECMAScript.VueDraggable.Test' or '$(MSBuildProjectName)' == 'ECMAScript.WangEditor.Test'">
+    <Reference Include="Acornima" HintPath="$(JazorAnalyzerDirectory)Acornima.dll" />
+    <Reference Include="Acornima.Extras" HintPath="$(JazorAnalyzerDirectory)Acornima.Extras.dll" />
+    <Reference Include="ICSharpCode.Decompiler" HintPath="$(JazorAnalyzerDirectory)ICSharpCode.Decompiler.dll" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildProjectName)' == 'Jazor.RazorVue.Sg.Test'">
     <Reference Include="Jazor.Analyzer" HintPath="$(JazorAnalyzerDirectory)Jazor.Analyzer.dll" />

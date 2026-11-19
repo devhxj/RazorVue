@@ -11,6 +11,9 @@ This repository maintains the Razor SDK integration, Vue runtime bridges, Jazor.
 | [ECMAScript.ElementPlus](src/ECMAScript.ElementPlus) | Element Plus components and services |
 | [ECMAScript.VueDataUi](src/ECMAScript.VueDataUi) | Vue Data UI charts and datasets |
 | [ECMAScript.Lucide](src/ECMAScript.Lucide) | Tree-shakeable Lucide Vue icons |
+| [ECMAScript.FilePond](src/ECMAScript.FilePond) | FilePond upload component and imperative API |
+| [ECMAScript.VueDraggable](src/ECMAScript.VueDraggable) | Drag-sort component and composable |
+| [ECMAScript.WangEditor](src/ECMAScript.WangEditor) | Rich-text editor, toolbar, and configuration |
 
 ## Compatibility
 
@@ -20,7 +23,9 @@ This repository maintains the Razor SDK integration, Vue runtime bridges, Jazor.
 | 2.1.0-preview.6 | Jazor and ECMAScript.Vue 2.1.0-preview.6 | [First standalone preview](https://github.com/devhxj/RazorVue/releases/tag/v2.1.0-preview.6). |
 | 2.1.0-preview.7 | 2.1.0-preview.6 | [Component binding migration](https://github.com/devhxj/RazorVue/releases/tag/v2.1.0-preview.7). |
 
-A Razor authoring project references both Jazor and Jazor.Vue directly. Use the shared SDK version in the same row as your RazorVue packages. The five component bindings keep their NuGet IDs and C# namespaces across the repository move.
+A Razor authoring project references both Jazor and Jazor.Vue directly. Use the shared SDK version in the same row as your RazorVue packages. The binding packages keep their NuGet IDs and C# namespaces across repository moves.
+
+The FilePond, VueDraggable, and WangEditor source is maintained here. The next standalone release is prepared against the shared SDK at 2.1.0-preview.6. [Preview 8 notes](docs/releases/v2.1.0-preview.8.md)
 
 ```xml
 <ItemGroup>
@@ -43,6 +48,6 @@ dotnet run --file samples/RazorVue.Authoring/verify-smoke.cs -- --configuration 
 dotnet run --file scripts/csharp/verify-windows-ssr-release.cs -- --package-source artifacts/packages --path-base /todo
 ```
 
-The two browser checks use Chrome on Windows. A v-prefixed Git tag sets the version of Jazor.Vue, Jazor.Admin, and the five component binding packages. The publish workflow runs the checks before NuGet Trusted Publishing. The production environment supplies the NUGET_USER secret. NuGet.org must authorize the devhxj/RazorVue repository, the nuget-publish-ref.yml workflow and the production environment for the seven release package IDs.
+The two browser checks use Chrome on Windows. Packing also builds a standalone Razor project with the FilePond, VueDraggable, and WangEditor candidate packages. A v-prefixed Git tag sets the version of Jazor.Vue, Jazor.Admin, and all eight bindings. The publish workflow runs verification before NuGet Trusted Publishing. NuGet.org must authorize the repository, the `nuget-publish-ref.yml` workflow, and the production environment for every package ID.
 
-The Razor compiler source history was extracted from [Jazor at preview 5](https://github.com/devhxj/Jazor/tree/v2.1.0-preview.5). The five bindings carry their original source history.
+The Razor compiler source history was extracted from [Jazor at preview 5](https://github.com/devhxj/Jazor/tree/v2.1.0-preview.5). The bindings carry their original source history.

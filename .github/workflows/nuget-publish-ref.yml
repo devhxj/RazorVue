@@ -31,7 +31,7 @@ jobs:
       - name: Verify Razor source generation and runtime coverage
         run: dotnet run --file scripts/csharp/verify-razorvue-coverage.cs
       - name: Verify component bindings
-        run: dotnet test RazorVue.slnx --filter "FullyQualifiedName~ComponentBinding|FullyQualifiedName~ComponentManifestTests|FullyQualifiedName~ExactPairUnion|FullyQualifiedName~LucideBindingTests|FullyQualifiedName~VueDataUi"
+        run: dotnet test RazorVue.slnx --filter "FullyQualifiedName~ComponentBinding|FullyQualifiedName~ComponentManifestTests|FullyQualifiedName~ExactPairUnion|FullyQualifiedName~LucideBindingTests|FullyQualifiedName~VueDataUi|FullyQualifiedName~ECMAScriptFilePondTest|FullyQualifiedName~ECMAScriptVueDraggableTest|FullyQualifiedName~ECMAScriptWangEditorTest"
       - name: Restore Vuetify generator inputs
         run: dotnet run --file scripts/csharp/restore-node-project.cs -- src/ECMAScript.Vue.Generator/vuetify-runtime
       - name: Verify binding generators and upstream contracts
@@ -58,10 +58,13 @@ jobs:
             artifacts/packages/Jazor.Vue.*.nupkg
             artifacts/packages/Jazor.Admin.*.nupkg
             artifacts/packages/ECMAScript.ElementPlus.*.nupkg
+            artifacts/packages/ECMAScript.FilePond.*.nupkg
             artifacts/packages/ECMAScript.Lucide.*.nupkg
             artifacts/packages/ECMAScript.TDesign.*.nupkg
             artifacts/packages/ECMAScript.VueDataUi.*.nupkg
+            artifacts/packages/ECMAScript.VueDraggable.*.nupkg
             artifacts/packages/ECMAScript.Vuetify.*.nupkg
+            artifacts/packages/ECMAScript.WangEditor.*.nupkg
           if-no-files-found: error
 
   publish:

@@ -8,7 +8,7 @@ var root = Directory.GetCurrentDirectory();
 var props = XDocument.Load(Path.Combine(root, "Directory.Build.props"));
 var sdkVersion = props.Descendants("JazorSdkVersion").Single().Value;
 var version = args.Length > 0 ? args[0] : props.Descendants("RazorVuePackageVersion").Single().Value;
-var feed = Path.GetFullPath("artifacts/packages");
+var feed = Path.GetFullPath(args.Length > 1 ? args[1] : "artifacts/packages");
 Directory.CreateDirectory(feed);
 
 // Detached consumers restore the published SDK and the RazorVue package candidates
@@ -32,10 +32,13 @@ foreach (var id in sdkPackages)
 var componentPackages = new (string Id, string Library, string License)[]
 {
     ("ECMAScript.ElementPlus", "element-plus", "LICENSE"),
+    ("ECMAScript.FilePond", "file-pond", "vue-filepond-LICENSE"),
     ("ECMAScript.Lucide", "lucide-vue-next", "LUCIDE-LICENSE"),
     ("ECMAScript.TDesign", "tdesign-vue-next", "LICENSE"),
     ("ECMAScript.VueDataUi", "vue-data-ui", "VUE-DATA-UI-LICENSE"),
-    ("ECMAScript.Vuetify", "vuetify", "LICENSE.md")
+    ("ECMAScript.VueDraggable", "vue-draggable", "vue-draggable-plus-LICENSE"),
+    ("ECMAScript.Vuetify", "vuetify", "LICENSE.md"),
+    ("ECMAScript.WangEditor", "wang-editor", "wangeditor-editor-LICENSE")
 };
 
 foreach (var (id, library, license) in componentPackages)
@@ -46,6 +49,7 @@ foreach (var (id, library, license) in componentPackages)
 
 await PackAsync("Jazor.Vue");
 await PackAsync("Jazor.Admin");
+await VerifyInteractionPackageConsumerAsync();
 
 void VerifyComponentPackage(string id, string library, string license)
 {
@@ -59,6 +63,10 @@ void VerifyComponentPackage(string id, string library, string license)
     foreach (var entry in requiredEntries)
         if (package.GetEntry(entry) is null)
             throw new InvalidOperationException($"{id} is missing {entry}.");
+
+    if (library is "file-pond" or "vue-draggable" or "wang-editor"
+        && package.GetEntry($"{resourceRoot}/inventory.json") is null)
+        throw new InvalidOperationException($"{id} is missing its upstream inventory.");
 
     if (package.Entries.Any(entry => entry.FullName.StartsWith($"{resourceRoot}/dist/", StringComparison.Ordinal)))
         throw new InvalidOperationException($"{id} must use the upstream npm asset graph.");
@@ -84,18 +92,89 @@ void VerifyComponentPackage(string id, string library, string license)
     Console.WriteLine($"Verified {id} {version} against SDK {sdkVersion}.");
 }
 
-async Task PackAsync(string project)
-{
-    var start = new ProcessStartInfo("dotnet") { WorkingDirectory = root, UseShellExecute = false };
-    foreach (var argument in new[]
-    {
+Task PackAsync(string project)
+    => RunDotnetAsync(
+    [
         "pack", Path.Combine("src", project, project + ".csproj"), "-c", "Release", "-o", feed,
         "-p:MinVerVersionOverride=" + version, "-p:RazorVuePackageVersion=" + version,
         "-p:RestoreAdditionalProjectSources=" + feed
-    })
+    ]);
+
+async Task VerifyInteractionPackageConsumerAsync()
+{
+    var workspace = Directory.CreateTempSubdirectory("razorvue-bindings-");
+    try
+    {
+        var project = Path.Combine(workspace.FullName, "InteractionBindings.csproj");
+        var packageReferences = new[]
+        {
+            new XElement("PackageReference", new XAttribute("Include", "Jazor"), new XAttribute("Version", sdkVersion)),
+            new XElement("PackageReference", new XAttribute("Include", "Jazor.Vue"), new XAttribute("Version", version),
+                new XAttribute("PrivateAssets", "all")),
+            new XElement("PackageReference", new XAttribute("Include", "ECMAScript.FilePond"), new XAttribute("Version", version)),
+            new XElement("PackageReference", new XAttribute("Include", "ECMAScript.VueDraggable"), new XAttribute("Version", version)),
+            new XElement("PackageReference", new XAttribute("Include", "ECMAScript.WangEditor"), new XAttribute("Version", version))
+        };
+        var output = Path.Combine(workspace.FullName, "jazor");
+        new XElement("Project", new XAttribute("Sdk", "Microsoft.NET.Sdk.Web"),
+            new XElement("PropertyGroup",
+                new XElement("TargetFramework", "net11.0"),
+                new XElement("LangVersion", "preview"),
+                new XElement("RazorLangVersion", "11.0"),
+                new XElement("CETCompat", "false"),
+                new XElement("JazorMode", "release"),
+                new XElement("JazorDir", output)),
+            new XElement("ItemGroup", packageReferences)).Save(project);
+        await File.WriteAllTextAsync(Path.Combine(workspace.FullName, "Program.cs"),
+            """System.Console.WriteLine("RazorVue interaction package consumer");""");
+        await File.WriteAllTextAsync(Path.Combine(workspace.FullName, "InteractionBindings.razor"), """
+            @using ECMAScript
+            @using static ECMAScript.Vue
+            @implements IVueComponent
+            @attribute [ECMAScriptModule("./components/interaction-bindings")]
+
+            <VueFilePond />
+            <VueDraggableList TItem="string" ModelValue="@Items">
+                <div>@context</div>
+            </VueDraggableList>
+            <WangEditorComponent ModelValue="initial" />
+
+            @code {
+                private IVueRef<string[]> Items { get; } = Vue.Ref(new[] { "first" });
+            }
+            """);
+
+        await RunDotnetAsync(
+        [
+            "build", project, "-c", "Release", "--configfile", Path.Combine(root, "NuGet.Config"),
+            "-p:RestoreAdditionalProjectSources=" + feed,
+            "-p:RestorePackagesPath=" + Path.Combine(workspace.FullName, "packages"),
+            "-p:JazorPnpmStoreDirectory=" + Path.Combine(root, ".tmp", "nodeapi-store")
+        ]);
+
+        var module = Path.Combine(output, "components", "interaction-bindings.js");
+        var contents = await File.ReadAllTextAsync(module);
+        foreach (var specifier in new[] { "vue-filepond", "vue-draggable-plus", "@wangeditor/editor-for-vue" })
+            if (!contents.Contains($"""from "{specifier}";""", StringComparison.Ordinal))
+                throw new InvalidOperationException($"The packaged Razor consumer did not import {specifier}.");
+        if (!File.Exists(Path.Combine(output, "dist", "bundle.js")))
+            throw new InvalidOperationException("The packaged Razor consumer did not produce a Vite bundle.");
+
+        Console.WriteLine("Verified packaged Razor authoring and Vite build for FilePond, VueDraggable, and WangEditor.");
+    }
+    finally
+    {
+        workspace.Delete(recursive: true);
+    }
+}
+
+async Task RunDotnetAsync(string[] arguments)
+{
+    var start = new ProcessStartInfo("dotnet") { WorkingDirectory = root, UseShellExecute = false };
+    foreach (var argument in arguments)
         start.ArgumentList.Add(argument);
-    using var process = Process.Start(start) ?? throw new InvalidOperationException($"Could not start pack for {project}.");
+    using var process = Process.Start(start) ?? throw new InvalidOperationException($"Could not start dotnet {arguments[0]}.");
     await process.WaitForExitAsync();
     if (process.ExitCode != 0)
-        throw new InvalidOperationException($"Could not pack {project}. Exit code {process.ExitCode}.");
+        throw new InvalidOperationException($"dotnet {arguments[0]} {arguments[1]} exited with code {process.ExitCode}.");
 }
