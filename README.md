@@ -22,17 +22,16 @@ This repository maintains the Razor SDK integration, Vue runtime bridges, Jazor.
 | 2.1.0-preview.5 | Jazor 2.1.0-preview.5 | Published as part of [Jazor preview 5](https://github.com/devhxj/Jazor/releases/tag/v2.1.0-preview.5). |
 | 2.1.0-preview.6 | Jazor and ECMAScript.Vue 2.1.0-preview.6 | [First standalone preview](https://github.com/devhxj/RazorVue/releases/tag/v2.1.0-preview.6). |
 | 2.1.0-preview.7 | 2.1.0-preview.6 | [Component binding migration](https://github.com/devhxj/RazorVue/releases/tag/v2.1.0-preview.7). |
+| 2.2.0-preview.1 | 2.2.0-preview.1 | [Razor adapter migration](https://github.com/devhxj/RazorVue/releases/tag/v2.2.0-preview.1). |
 
 A Razor authoring project references both Jazor and Jazor.Vue directly. Use the shared SDK version in the same row as your RazorVue packages. The binding packages keep their NuGet IDs and C# namespaces across repository moves.
 
-The FilePond, VueDraggable, and WangEditor source is maintained here. The next standalone release is prepared against the shared SDK at 2.1.0-preview.6. [Preview 8 notes](docs/releases/v2.1.0-preview.8.md)
-
-The 2.2 migration moves the Razor Router components, Blazor event extensions, and Vue injection contracts into the `Jazor.Vue` package. Upgrade the shared packages and `Jazor.Vue` together and rebuild the projects that use the moved types. [2.2 migration notes](docs/releases/v2.2.0-preview.1.md)
+The 2.2 preview adds the migrated FilePond, VueDraggable, and WangEditor packages and moves the Razor Router components, Blazor event extensions, and Vue injection contracts into `Jazor.Vue`. Upgrade the shared packages and `Jazor.Vue` together and rebuild the projects that use the moved types. [2.2 migration notes](docs/releases/v2.2.0-preview.1.md)
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Jazor" Version="2.1.0-preview.6" />
-  <PackageReference Include="Jazor.Vue" Version="2.1.0-preview.7" PrivateAssets="all" />
+  <PackageReference Include="Jazor" Version="2.2.0-preview.1" />
+  <PackageReference Include="Jazor.Vue" Version="2.2.0-preview.1" PrivateAssets="all" />
 </ItemGroup>
 ```
 

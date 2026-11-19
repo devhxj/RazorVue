@@ -14,8 +14,8 @@
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Jazor" Version="2.0.0" />
-  <PackageReference Include="Jazor.Vue" Version="2.0.0" PrivateAssets="all" />
+  <PackageReference Include="Jazor" Version="2.2.0-preview.1" />
+  <PackageReference Include="Jazor.Vue" Version="2.2.0-preview.1" PrivateAssets="all" />
 </ItemGroup>
 ```
 
