@@ -65,13 +65,15 @@ static void AssertAuthoringSource(string sampleRoot)
 {
     var forbidden = new[]
     {
-        "BuildRenderTree", "RenderTreeBuilder", "AdminInput", "AdminForm", "VueProp", "IJSRuntime"
+        "BuildRenderTree", "RenderTreeBuilder", "AdminInput", "AdminForm", "IJSRuntime"
     };
     var violations = Directory.EnumerateFiles(sampleRoot, "*.*", SearchOption.AllDirectories)
         .Where(static path => path.EndsWith(".cs", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".razor", StringComparison.OrdinalIgnoreCase))
         .Where(static path => !IsGeneratedPath(path) && !IsVerificationScript(path))
         .SelectMany(path => File.ReadLines(path).Select((line, index) => (Path: path, Line: index + 1, Text: line)))
+        // VueProps is the public route payload contract. VueProp was the retired bridge API.
         .Where(item => forbidden.Any(token => item.Text.Contains(token, StringComparison.Ordinal)) ||
+                       Regex.IsMatch(item.Text, @"\bVueProp\b", RegexOptions.CultureInvariant) ||
                        (!IsRouteHostFraming(item.Path) && item.Text.Contains("VueSlot", StringComparison.Ordinal)))
         .Select(item => Path.GetFileName(item.Path) + ":" + item.Line + ": " + item.Text.Trim())
         .ToArray();
