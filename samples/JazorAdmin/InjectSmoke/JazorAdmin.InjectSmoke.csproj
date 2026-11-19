@@ -10,8 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="Jazor" Version="$(JazorPackageVersion)" />
-    <PackageReference Include="Jazor.Vue" Version="$(JazorPackageVersion)" PrivateAssets="all" />
-    <PackageReference Include="Jazor.Admin" Version="$(JazorPackageVersion)" />
+    <PackageReference Include="Jazor.Vue" Version="$(RazorVuePackageVersion)" PrivateAssets="all" />
+    <PackageReference Include="Jazor.Admin" Version="$(RazorVuePackageVersion)" />
     <PackageReference Include="ECMAScript.VueRoute" Version="$(JazorPackageVersion)" />
   </ItemGroup>
 </Project>

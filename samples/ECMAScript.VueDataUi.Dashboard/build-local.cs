@@ -10,6 +10,7 @@ var packageOutput = Path.Combine(repoRoot, "artifacts", "packages");
 var artifactRoot = Path.Combine(repoRoot, ".tmp", "sample-dataui-dashboard", options.Configuration);
 var restorePackagesPath = Path.Combine(repoRoot, ".tmp", "nuget-dataui-sample-packages");
 var dotnetCliHome = Path.Combine(repoRoot, ".dotnet");
+Environment.SetEnvironmentVariable("JazorPnpmStoreDirectory", Path.Combine(repoRoot, ".tmp", "nodeapi-store"));
 ScriptHelpers.CleanDirectoryWithinRepo(artifactRoot, repoRoot);
 var packageInfo = ScriptHelpers.ResolveJazorPackage(packageOutput);
 var packageCache = Path.Combine(restorePackagesPath, packageInfo.Version + "-" + packageInfo.Stamp);
@@ -26,6 +27,8 @@ await ScriptHelpers.RunDotNetAsync(
         "-p:JazorPackageVersion=" + packageInfo.Version,
         "-p:RazorVuePackageVersion=" + ScriptHelpers.ResolveJazorPackage(packageOutput, "Jazor.Vue").Version,
         "-p:JazorDir=" + Path.Combine(artifactRoot, "jazor"),
+        "-p:JazorIsolatedBaseOutputRoot=" + Path.Combine(artifactRoot, "bin"),
+        "-p:JazorIsolatedBaseIntermediateOutputRoot=" + Path.Combine(artifactRoot, "obj"),
         "/nr:false",
         "-p:UseSharedCompilation=false"
     ],

@@ -34,6 +34,8 @@ jobs:
         run: dotnet run --file scripts/csharp/pack-release.cs -- ${{ steps.version.outputs.value }}
       - name: Verify Admin components
         run: dotnet test src/Jazor.Admin.Test/Jazor.Admin.Test.csproj -p:RazorVuePackageVersion=${{ steps.version.outputs.value }} "-p:RestoreAdditionalProjectSources=${{ github.workspace }}/artifacts/packages"
+      - name: Verify the packaged Vue Data UI sample
+        run: dotnet run --file samples/ECMAScript.VueDataUi.Dashboard/build-local.cs -- --configuration Release
       - name: Verify packaged SPA in Chrome
         run: dotnet run --file samples/RazorVue.Authoring/verify-smoke.cs -- --configuration Release --package-output artifacts/packages
       - name: Verify packaged SSR and hydration in Chrome

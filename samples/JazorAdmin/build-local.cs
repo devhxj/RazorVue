@@ -12,12 +12,11 @@ var repoRoot = ScriptHelpers.FindRepositoryRoot(adminRoot);
 var projectPath = Path.Combine(adminRoot, "JazorAdmin.csproj");
 var injectProjectPath = Path.Combine(adminRoot, "InjectSmoke", "JazorAdmin.InjectSmoke.csproj");
 var demoProjectPath = Path.Combine(repoRoot, "samples", "JazorAdmin.DemoClient", "JazorAdmin.DemoClient.csproj");
-var publishScriptPath = Path.Combine(repoRoot, "scripts", "csharp", "publish-nuget.cs");
-var packageOutput = Path.Combine(repoRoot, ".tmp", "nupkg-sample");
+var publishScriptPath = Path.Combine(repoRoot, "scripts", "csharp", "pack-release.cs");
+var packageOutput = Path.Combine(repoRoot, "artifacts", "packages");
 var dotnetCliHome = Path.Combine(repoRoot, ".dotnet");
 
 ScriptHelpers.SetCommonEnvironment(dotnetCliHome);
-ScriptHelpers.CleanDirectoryWithinRepo(packageOutput, repoRoot);
 if (!string.IsNullOrWhiteSpace(options.JazorDir))
 {
     ScriptHelpers.CleanDirectoryWithinRepo(ScriptHelpers.ResolvePath(repoRoot, options.JazorDir), repoRoot);
@@ -31,34 +30,14 @@ if (!string.IsNullOrWhiteSpace(options.DemoJazorDir))
     ScriptHelpers.CleanDirectoryWithinRepo(ScriptHelpers.ResolvePath(repoRoot, options.DemoJazorDir), repoRoot);
 }
 
-var isolation = ScriptHelpers.GetIsolationArguments(options, repoRoot);
-var packArguments = new List<string>
-{
-    "run",
-    "--file",
-    publishScriptPath,
-    "--",
-    "--configuration", options.Configuration,
-    "--output-directory", packageOutput,
-    "--skip-push",
-    "--package", "jazor",
-    "--package", "jazor-vue",
-    "--package", "style",
-    "--package", "vueroute",
-    "--package", "admin",
-    "--package", "tdesign",
-    "--package", "dataui",
-    "--package", "lucide"
-};
-if (!string.IsNullOrWhiteSpace(options.PackageVersion))
-{
-    packArguments.Add("--package-version");
+var buildProperties = ScriptHelpers.GetIsolationArguments(options, repoRoot);
+var packArguments = new List<string> { "run", "--file", publishScriptPath, "--" };
+if (options.PackageVersion is not null)
     packArguments.Add(options.PackageVersion);
-}
-packArguments.AddRange(isolation.PublishArguments);
 await ScriptHelpers.RunDotNetAsync(packArguments, repoRoot, dotnetCliHome);
 
 var packageInfo = ScriptHelpers.ResolveLatestPackage(packageOutput);
+var razorVueVersion = ScriptHelpers.ResolveLatestPackage(packageOutput, "Jazor.Vue").Version;
 // NuGetPackageRoot is consumed as an MSBuild directory prefix. Preserve the trailing separator;
 // otherwise package ids can be concatenated directly onto the isolated cache directory on Windows.
 var restorePackagesPath = Path.Combine(repoRoot, ".tmp", "nuget-sample-packages", $"{packageInfo.Version}-{packageInfo.Stamp}")
@@ -75,10 +54,11 @@ var buildArguments = new List<string>
     $"-p:RestorePackagesPath={restorePackagesPath}",
     "-p:RestoreForce=true",
     $"-p:JazorPackageVersion={packageInfo.Version}",
+    $"-p:RazorVuePackageVersion={razorVueVersion}",
     "/nr:false",
     "-p:UseSharedCompilation=false"
 };
-buildArguments.AddRange(isolation.BuildArguments);
+buildArguments.AddRange(buildProperties);
 
 if (!string.IsNullOrWhiteSpace(options.JazorDir))
 {
@@ -99,10 +79,11 @@ var injectBuildArguments = new List<string>
     $"-p:RestorePackagesPath={restorePackagesPath}",
     "-p:RestoreForce=true",
     $"-p:JazorPackageVersion={packageInfo.Version}",
+    $"-p:RazorVuePackageVersion={razorVueVersion}",
     "/nr:false",
     "-p:UseSharedCompilation=false"
 };
-injectBuildArguments.AddRange(isolation.BuildArguments);
+injectBuildArguments.AddRange(buildProperties);
 
 if (!string.IsNullOrWhiteSpace(options.InjectJazorDir))
 {
@@ -125,11 +106,12 @@ if (!string.IsNullOrWhiteSpace(options.DemoJazorDir))
         $"-p:RestorePackagesPath={restorePackagesPath}",
         "-p:RestoreForce=true",
         $"-p:JazorPackageVersion={packageInfo.Version}",
+        $"-p:RazorVuePackageVersion={razorVueVersion}",
         "-p:JazorDir=" + ScriptHelpers.ResolvePath(repoRoot, options.DemoJazorDir),
         "/nr:false",
         "-p:UseSharedCompilation=false"
     };
-    demoBuildArguments.AddRange(isolation.BuildArguments);
+    demoBuildArguments.AddRange(buildProperties);
     await ScriptHelpers.RunDotNetAsync(demoBuildArguments, repoRoot, dotnetCliHome);
 }
 
@@ -232,10 +214,6 @@ internal sealed record SampleBuildOptions(
 
 internal sealed record PackageInfo(string Version, string Stamp);
 
-internal readonly record struct IsolationArguments(
-    IReadOnlyList<string> PublishArguments,
-    IReadOnlyList<string> BuildArguments);
-
 internal static class ScriptHelpers
 {
     public static string GetScriptPath([CallerFilePath] string path = "")
@@ -260,6 +238,7 @@ internal static class ScriptHelpers
     public static void SetCommonEnvironment(string dotnetCliHome)
     {
         Environment.SetEnvironmentVariable("DOTNET_CLI_HOME", dotnetCliHome);
+        Environment.SetEnvironmentVariable("JazorPnpmStoreDirectory", Path.Combine(Path.GetDirectoryName(dotnetCliHome)!, ".tmp", "nodeapi-store"));
         Environment.SetEnvironmentVariable("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", "1");
         Environment.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", "1");
         Environment.SetEnvironmentVariable("UseSharedCompilation", "false");
@@ -268,44 +247,36 @@ internal static class ScriptHelpers
     public static string ResolvePath(string repoRoot, string path)
         => Path.GetFullPath(Path.IsPathRooted(path) ? path : Path.Combine(repoRoot, path));
 
-    public static IsolationArguments GetIsolationArguments(SampleBuildOptions options, string repoRoot)
+    public static IReadOnlyList<string> GetIsolationArguments(SampleBuildOptions options, string repoRoot)
     {
-        var publish = new List<string>();
         var build = new List<string>();
         if (!string.IsNullOrWhiteSpace(options.BaseOutputPath))
         {
             var root = ResolveBuildRoot(repoRoot, options.BaseOutputPath);
-            publish.Add("--base-output-path");
-            publish.Add(root);
             build.Add("-p:JazorIsolatedBaseOutputRoot=" + root);
         }
 
         if (!string.IsNullOrWhiteSpace(options.BaseIntermediateOutputPath))
         {
             var root = ResolveBuildRoot(repoRoot, options.BaseIntermediateOutputPath);
-            publish.Add("--base-intermediate-output-path");
-            publish.Add(root);
             build.Add("-p:JazorIsolatedBaseIntermediateOutputRoot=" + root);
         }
 
-        return new IsolationArguments(publish, build);
+        return build;
     }
 
-    public static PackageInfo ResolveLatestPackage(string packageOutput)
+    public static PackageInfo ResolveLatestPackage(string packageOutput, string packageId = "Jazor")
     {
+        var prefix = packageId + ".";
         var packageFile = new DirectoryInfo(packageOutput)
-            .EnumerateFiles("Jazor.*.nupkg", SearchOption.TopDirectoryOnly)
+            .EnumerateFiles(prefix + "*.nupkg", SearchOption.TopDirectoryOnly)
             .Where(static file => !file.Name.EndsWith(".snupkg", StringComparison.OrdinalIgnoreCase))
-            .Where(static file =>
-            {
-                const string prefix = "Jazor.";
-                return file.Name.Length > prefix.Length && char.IsDigit(file.Name[prefix.Length]);
-            })
+            .Where(file => file.Name.Length > prefix.Length && char.IsDigit(file.Name[prefix.Length]))
             .OrderByDescending(static file => file.LastWriteTimeUtc)
             .FirstOrDefault()
             ?? throw new InvalidOperationException("Packed Jazor package not found under '" + packageOutput + "'.");
 
-        var version = Path.GetFileNameWithoutExtension(packageFile.Name).Replace("Jazor.", string.Empty, StringComparison.Ordinal);
+        var version = Path.GetFileNameWithoutExtension(packageFile.Name)[prefix.Length..];
         var stamp = packageFile.LastWriteTimeUtc.ToString("yyyyMMddHHmmssffff", CultureInfo.InvariantCulture);
         return new PackageInfo(version, stamp);
     }
