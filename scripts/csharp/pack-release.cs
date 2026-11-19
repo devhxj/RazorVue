@@ -1,6 +1,7 @@
 #!/usr/bin/env dotnet run
 
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Xml.Linq;
 
 var root = Directory.GetCurrentDirectory();
@@ -10,12 +11,11 @@ var version = args.Length > 0 ? args[0] : props.Descendants("RazorVuePackageVers
 var feed = Path.GetFullPath("artifacts/packages");
 Directory.CreateDirectory(feed);
 
-// Both browser gates restore detached projects from this feed. Only RazorVue owns
-// Jazor.Vue and Jazor.Admin; the SDK packages retain their upstream identity.
+// Detached consumers restore the published SDK and the RazorVue package candidates
+// from the same feed. Only the candidates are uploaded by this repository.
 string[] sdkPackages =
 [
-    "Jazor", "ECMAScript.Vue", "ECMAScript.Style", "ECMAScript.VueRoute", "ECMAScript.VueDataUi",
-    "ECMAScript.Lucide", "ECMAScript.TDesign", "ECMAScript.ElementPlus", "ECMAScript.Vuetify"
+    "Jazor", "ECMAScript.Vue", "ECMAScript.Style", "ECMAScript.VueRoute"
 ];
 using var client = new HttpClient();
 foreach (var id in sdkPackages)
@@ -29,8 +29,60 @@ foreach (var id in sdkPackages)
     await File.WriteAllBytesAsync(target, await client.GetByteArrayAsync(url));
 }
 
+var componentPackages = new (string Id, string Library, string License)[]
+{
+    ("ECMAScript.ElementPlus", "element-plus", "LICENSE"),
+    ("ECMAScript.Lucide", "lucide-vue-next", "LUCIDE-LICENSE"),
+    ("ECMAScript.TDesign", "tdesign-vue-next", "LICENSE"),
+    ("ECMAScript.VueDataUi", "vue-data-ui", "VUE-DATA-UI-LICENSE"),
+    ("ECMAScript.Vuetify", "vuetify", "LICENSE.md")
+};
+
+foreach (var (id, library, license) in componentPackages)
+{
+    await PackAsync(id);
+    VerifyComponentPackage(id, library, license);
+}
+
 await PackAsync("Jazor.Vue");
 await PackAsync("Jazor.Admin");
+
+void VerifyComponentPackage(string id, string library, string license)
+{
+    using var package = ZipFile.OpenRead(Path.Combine(feed, $"{id}.{version}.nupkg"));
+    var resourceRoot = $"jazor/{library}";
+    string[] requiredEntries =
+    [
+        "README.md", $"lib/net11.0/{id}.dll", $"lib/net11.0/{id}.xml",
+        $"buildTransitive/{id}.targets", $"{resourceRoot}/manifest.json", $"{resourceRoot}/licenses/{license}"
+    ];
+    foreach (var entry in requiredEntries)
+        if (package.GetEntry(entry) is null)
+            throw new InvalidOperationException($"{id} is missing {entry}.");
+
+    if (package.Entries.Any(entry => entry.FullName.StartsWith($"{resourceRoot}/dist/", StringComparison.Ordinal)))
+        throw new InvalidOperationException($"{id} must use the upstream npm asset graph.");
+
+    using var manifest = package.GetEntry($"{id}.nuspec")!.Open();
+    var metadata = XDocument.Load(manifest).Root!.Elements().Single(element => element.Name.LocalName == "metadata");
+    var ns = metadata.Name.Namespace;
+    if (metadata.Element(ns + "repository")?.Attribute("url")?.Value != "https://github.com/devhxj/RazorVue")
+        throw new InvalidOperationException($"{id} must identify the RazorVue source repository.");
+
+    var dependencies = metadata.Descendants(ns + "dependency")
+        .ToDictionary(dependency => dependency.Attribute("id")!.Value);
+    string[] expected = id == "ECMAScript.ElementPlus"
+        ? ["Jazor", "ECMAScript.Vue", "ECMAScript.VueRoute"]
+        : ["Jazor", "ECMAScript.Vue"];
+    foreach (var dependency in expected)
+        if (dependencies.GetValueOrDefault(dependency)?.Attribute("version")?.Value != $"[{sdkVersion}]")
+            throw new InvalidOperationException($"{id} must pin {dependency} to SDK {sdkVersion}.");
+
+    if (dependencies["Jazor"].Attribute("exclude")?.Value != "Build,Analyzers")
+        throw new InvalidOperationException($"{id} must leave SDK tooling selection to the consumer.");
+
+    Console.WriteLine($"Verified {id} {version} against SDK {sdkVersion}.");
+}
 
 async Task PackAsync(string project)
 {

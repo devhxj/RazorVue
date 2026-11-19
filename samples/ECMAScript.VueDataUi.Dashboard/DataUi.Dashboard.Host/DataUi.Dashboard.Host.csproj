@@ -18,6 +18,6 @@
   <ItemGroup>
     <PackageReference Include="Jazor" Version="$(JazorPackageVersion)" />
     <PackageReference Include="Jazor.Vue" Version="$(RazorVuePackageVersion)" PrivateAssets="all" />
-    <PackageReference Include="ECMAScript.VueDataUi" Version="$(JazorPackageVersion)" />
+    <PackageReference Include="ECMAScript.VueDataUi" Version="$(RazorVuePackageVersion)" />
   </ItemGroup>
 </Project>

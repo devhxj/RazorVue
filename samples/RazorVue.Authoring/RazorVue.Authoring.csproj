@@ -21,7 +21,7 @@
   <ItemGroup>
     <PackageReference Include="Jazor" Version="$(JazorPackageVersion)" />
     <PackageReference Include="Jazor.Vue" Version="$(RazorVuePackageVersion)" PrivateAssets="all" />
-    <PackageReference Include="ECMAScript.TDesign" Version="$(JazorPackageVersion)" />
+    <PackageReference Include="ECMAScript.TDesign" Version="$(RazorVuePackageVersion)" />
     <PackageReference Include="ECMAScript.Style" Version="$(JazorPackageVersion)" />
   </ItemGroup>
 </Project>

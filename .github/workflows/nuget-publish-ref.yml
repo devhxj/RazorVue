@@ -30,6 +30,17 @@ jobs:
           "value=$version" >> $env:GITHUB_OUTPUT
       - name: Verify Razor source generation and runtime coverage
         run: dotnet run --file scripts/csharp/verify-razorvue-coverage.cs
+      - name: Verify component bindings
+        run: dotnet test RazorVue.slnx --filter "FullyQualifiedName~ComponentBinding|FullyQualifiedName~ComponentManifestTests|FullyQualifiedName~ExactPairUnion|FullyQualifiedName~LucideBindingTests|FullyQualifiedName~VueDataUi"
+      - name: Restore Vuetify generator inputs
+        run: dotnet run --file scripts/csharp/restore-node-project.cs -- src/ECMAScript.Vue.Generator/vuetify-runtime
+      - name: Verify binding generators and upstream contracts
+        run: dotnet run --file scripts/csharp/verify-vue-binding-contracts.cs -- --report artifacts/binding-contracts/report.json --baseline docs/04-roadmap/binding-contract-baseline.json --fail-on-baseline-drift
+      - name: Verify type-derived hints and XML documentation
+        run: |
+          dotnet run --project src/ECMAScript.Vue.Generator -- authoring --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet run --project src/ECMAScript.Vue.Generator -- documentation --check
       - name: Pack against the public Jazor SDK
         run: dotnet run --file scripts/csharp/pack-release.cs -- ${{ steps.version.outputs.value }}
       - name: Verify Admin components
@@ -46,6 +57,11 @@ jobs:
           path: |
             artifacts/packages/Jazor.Vue.*.nupkg
             artifacts/packages/Jazor.Admin.*.nupkg
+            artifacts/packages/ECMAScript.ElementPlus.*.nupkg
+            artifacts/packages/ECMAScript.Lucide.*.nupkg
+            artifacts/packages/ECMAScript.TDesign.*.nupkg
+            artifacts/packages/ECMAScript.VueDataUi.*.nupkg
+            artifacts/packages/ECMAScript.Vuetify.*.nupkg
           if-no-files-found: error
 
   publish:
@@ -73,11 +89,15 @@ jobs:
             dotnet nuget push $package.FullName --api-key $env:NUGET_TEMPORARY_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+      - uses: actions/checkout@v4
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           PACKAGE_VERSION: ${{ needs.verify.outputs.version }}
         run: |
-          $arguments = @('release', 'create', $env:GITHUB_REF_NAME, '--repo', $env:GITHUB_REPOSITORY, '--generate-notes', '--verify-tag')
+          $arguments = @('release', 'create', $env:GITHUB_REF_NAME, '--repo', $env:GITHUB_REPOSITORY, '--verify-tag')
+          $notes = ".github/release-notes/$env:GITHUB_REF_NAME.md"
+          if (Test-Path -LiteralPath $notes) { $arguments += @('--notes-file', $notes) }
+          else { $arguments += '--generate-notes' }
           if ($env:PACKAGE_VERSION.Contains('-')) { $arguments += '--prerelease' }
           gh @arguments

@@ -1,0 +1,17 @@
+<Project Sdk="MSTest.Sdk/4.5.3">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <!-- The public SDK grants its Emit test harness access under this assembly name. -->
+    <AssemblyName>Jazor.EmitTest</AssemblyName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseVSTest>true</UseVSTest>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Jazor" Version="$(JazorSdkVersion)" ExcludeAssets="build" GeneratePathProperty="true" />
+    <PackageReference Include="ECMAScript.Vue" Version="$(JazorSdkVersion)" GeneratePathProperty="true" />
+    <Reference Include="Jazor.Emit" HintPath="$(PkgJazor)\tools\net11.0\Jazor.Emit.dll" />
+    <Reference Include="Jazor.Common" HintPath="$(PkgJazor)\tools\net11.0\Jazor.Common.dll" />
+    <None Include="$(PkgECMAScript_Vue)\jazor\vue3\manifest.json" Link="vue3.manifest.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

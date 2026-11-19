@@ -16,12 +16,12 @@
   <ItemGroup>
     <PackageReference Include="Jazor" Version="$(JazorSdkVersion)" ExcludeAssets="build" />
     <PackageReference Include="ECMAScript.Vue" Version="$(JazorSdkVersion)" />
-    <PackageReference Include="ECMAScript.VueDataUi" Version="$(JazorSdkVersion)" />
-    <PackageReference Include="ECMAScript.Lucide" Version="$(JazorSdkVersion)" />
+    <ProjectReference Include="../ECMAScript.VueDataUi/ECMAScript.VueDataUi.csproj" />
+    <ProjectReference Include="../ECMAScript.Lucide/ECMAScript.Lucide.csproj" />
     <PackageReference Include="ECMAScript.VueRoute" Version="$(JazorSdkVersion)" />
-    <PackageReference Include="ECMAScript.TDesign" Version="$(JazorSdkVersion)" />
-    <PackageReference Include="ECMAScript.ElementPlus" Version="$(JazorSdkVersion)" />
-    <PackageReference Include="ECMAScript.Vuetify" Version="$(JazorSdkVersion)" />
+    <ProjectReference Include="../ECMAScript.TDesign/ECMAScript.TDesign.csproj" />
+    <ProjectReference Include="../ECMAScript.ElementPlus/ECMAScript.ElementPlus.csproj" />
+    <ProjectReference Include="../ECMAScript.Vuetify/ECMAScript.Vuetify.csproj" />
     <PackageReference Include="ECMAScript.Style" Version="$(JazorSdkVersion)" />
     <ProjectReference Include="..\Jazor.RazorVue\Jazor.RazorVue.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
