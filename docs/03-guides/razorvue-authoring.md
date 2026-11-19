@@ -433,7 +433,7 @@ private void PageChanged(Number value) => BusinessPage = (int)value;
 执行作者门禁：
 
 ```text
-dotnet run --file scripts/csharp/test-dotnet.cs -- --project razor-sg --filter "RazorSgOfficialElementPlusNumericUnionTests|RazorSgOfficialNumericUnionMatrixTests"
+dotnet test src/Jazor.RazorVue.Sg.Test/Jazor.RazorVue.Sg.Test.csproj --filter "FullyQualifiedName~RazorSgOfficialElementPlusNumericUnionTests|FullyQualifiedName~RazorSgOfficialNumericUnionMatrixTests"
 dotnet test src/Jazor.CompilerTest/Jazor.CompilerTest.csproj --filter "ErasedUnionProjectionTests|BindingAuthoringDocumentationTests"
 dotnet run --project src/ECMAScript.Vue.Generator -- authoring --check
 ```
