@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jazor.Admin\Jazor.Admin.csproj" />
+    <PackageReference Include="Jazor" Version="$(JazorSdkVersion)" ExcludeAssets="build" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="$(CoverletVersion)" PrivateAssets="all" />

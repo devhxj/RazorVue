@@ -17,32 +17,37 @@ var options = SmokeOptions.Parse(args);
 var repoRoot = ScriptHelpers.FindRepositoryRoot(Directory.GetCurrentDirectory());
 Environment.SetEnvironmentVariable("JazorPnpmStoreDirectory", Path.Combine(repoRoot, ".tmp", "nodeapi-store"));
 var sampleRoot = Path.Combine(repoRoot, "samples", "RazorVue.Authoring");
-var buildScript = Path.Combine(sampleRoot, "build-local.cs");
 var workRoot = ScriptHelpers.ResolvePath(repoRoot, options.WorkRoot ?? Path.Combine(".tmp", "sample-smoke", "RazorVue.Authoring", options.Configuration));
 var packageOutput = ScriptHelpers.ResolvePath(repoRoot, options.PackageOutput ?? Path.Combine(".tmp", "nupkg-sample", "RazorVue.Authoring"));
-var sourceJazorRoot = Path.Combine(workRoot, "source-jazor");
 var packageJazorRoot = Path.Combine(workRoot, "package-jazor");
 var releaseJazorRoot = Path.Combine(workRoot, "release-jazor");
 var browserWorkRoot = Path.Combine(workRoot, "browser");
 
-ScriptHelpers.EnsureInsideRepository(repoRoot, workRoot, packageOutput, sourceJazorRoot, packageJazorRoot, releaseJazorRoot, browserWorkRoot);
+ScriptHelpers.EnsureInsideRepository(repoRoot, workRoot, packageJazorRoot, releaseJazorRoot, browserWorkRoot);
 
 if (!options.SkipBuild)
 {
-    await ScriptHelpers.RunProcessAsync(
-        "dotnet",
-        [
-            "run", "--no-launch-profile", "--file", buildScript, "--",
-            "--configuration", options.Configuration,
-            "--work-root", workRoot,
-            "--package-output", packageOutput,
-            "--source-jazor-dir", sourceJazorRoot,
-            "--jazor-dir", packageJazorRoot,
-            "--release-jazor-dir", releaseJazorRoot
-        ],
-        repoRoot);
-}
+    var project = Path.Combine(sampleRoot, "RazorVue.Authoring.csproj");
+    var sdkVersion = ReadVersion(packageOutput, "Jazor");
+    var razorVueVersion = ReadVersion(packageOutput, "Jazor.Vue");
+    var output = Path.Combine(workRoot, "consumer-build-out") + Path.DirectorySeparatorChar;
+    var intermediate = Path.Combine(workRoot, "consumer-build-obj") + Path.DirectorySeparatorChar;
+    await BuildAsync("debug", packageJazorRoot);
+    await BuildAsync("release", releaseJazorRoot);
 
+    Task BuildAsync(string mode, string jazorDirectory)
+        => ScriptHelpers.RunProcessAsync("dotnet",
+            [
+                "build", project, "-c", options.Configuration, "-t:Rebuild", "/m:1", "/nr:false",
+                "-p:JazorMode=" + mode, "-p:JazorDir=" + jazorDirectory,
+                "-p:JazorPackageVersion=" + sdkVersion,
+                "-p:RazorVuePackageVersion=" + razorVueVersion,
+                "-p:JazorIsolatedBaseOutputRoot=" + output,
+                "-p:JazorIsolatedBaseIntermediateOutputRoot=" + intermediate,
+                "-p:RestoreAdditionalProjectSources=" + packageOutput,
+                "-p:RestorePackagesPath=" + Path.Combine(workRoot, "packages")
+            ], repoRoot);
+}
 AssertAuthoringSource(sampleRoot);
 AssertDebugArtifacts(packageJazorRoot);
 AssertReleaseArtifacts(releaseJazorRoot);
@@ -198,22 +203,16 @@ static void AssertReleaseArtifacts(string root)
 
 static void AssertLocalPackages(string packageOutput)
 {
-    var required = new[] { "Jazor", "Jazor.Vue", "ECMAScript.TDesign", "ECMAScript.Style" };
-    foreach (var packageId in required)
-    {
-        var package = new DirectoryInfo(packageOutput)
-            .EnumerateFiles("*.nupkg", SearchOption.TopDirectoryOnly)
-            .Where(static file => !file.Name.EndsWith(".snupkg", StringComparison.OrdinalIgnoreCase))
-            .Where(file => string.Equals(ReadPackageId(file.FullName), packageId, StringComparison.Ordinal))
-            .OrderByDescending(static file => file.LastWriteTimeUtc)
-            .FirstOrDefault()
-            ?? throw new FileNotFoundException("Local package was not produced: " + packageId);
-        using var archive = ZipFile.OpenRead(package.FullName);
-        if (archive.Entries.Count == 0)
-            throw new InvalidOperationException("Local package is empty: " + package.FullName);
-    }
+    foreach (var packageId in new[] { "Jazor", "Jazor.Vue", "ECMAScript.Vue", "ECMAScript.TDesign", "ECMAScript.Style" })
+        _ = ReadVersion(packageOutput, packageId);
 }
 
+static string ReadVersion(string packageOutput, string packageId)
+{
+    var package = Directory.EnumerateFiles(packageOutput, "*.nupkg")
+        .Single(path => string.Equals(ReadPackageId(path), packageId, StringComparison.Ordinal));
+    return Path.GetFileNameWithoutExtension(package)[(packageId.Length + 1)..];
+}
 static string? ReadPackageId(string packagePath)
 {
     using var archive = ZipFile.OpenRead(packagePath);
@@ -527,12 +526,12 @@ internal static class ScriptHelpers
         var current = new DirectoryInfo(Path.GetFullPath(startDirectory));
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "Jazor.slnx")))
+            if (File.Exists(Path.Combine(current.FullName, "RazorVue.slnx")))
                 return current.FullName;
             current = current.Parent;
         }
 
-        throw new InvalidOperationException("Cannot locate repository root (Jazor.slnx).");
+        throw new InvalidOperationException("Cannot locate repository root (RazorVue.slnx).");
     }
 
     public static string ResolvePath(string repoRoot, string path)

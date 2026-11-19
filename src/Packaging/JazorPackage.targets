@@ -10,7 +10,7 @@
       <_JazorProjectDir>$([MSBuild]::EnsureTrailingSlash('$(MSBuildProjectDirectory)'))</_JazorProjectDir>
       <!-- NuspecProperties is a semicolon-delimited list; escape user-authored text before composing it. -->
       <_JazorPackageDescription>$([MSBuild]::Escape('$(Description)'))</_JazorPackageDescription>
-      <NuspecProperties>packageId=$(PackageId);version=$(_JazorPackageVersion);packageAuthors=$(Authors);packageDescription=$(_JazorPackageDescription);repositoryUrl=$(RepositoryUrl);repositoryType=$(RepositoryType);dependencyVersion=$(_JazorPackageVersion);buildOutputDir=$(_JazorBuildOutputDir);projectDir=$(_JazorProjectDir);packageReadmeFile=$(PackageReadmeFile);buildOutputRoot=$(JazorPackageBuildOutputRoot);nugetPackageRoot=$(NuGetPackageRoot);configuration=$(Configuration);angleSharpVersion=$(AngleSharpVersion)</NuspecProperties>
+      <NuspecProperties>packageId=$(PackageId);version=$(_JazorPackageVersion);packageAuthors=$(Authors);packageDescription=$(_JazorPackageDescription);repositoryUrl=$(RepositoryUrl);repositoryType=$(RepositoryType);dependencyVersion=$(_JazorPackageVersion);jazorSdkVersion=$(JazorSdkVersion);buildOutputDir=$(_JazorBuildOutputDir);projectDir=$(_JazorProjectDir);packageReadmeFile=$(PackageReadmeFile);buildOutputRoot=$(JazorPackageBuildOutputRoot);nugetPackageRoot=$(NuGetPackageRoot);configuration=$(Configuration);angleSharpVersion=$(AngleSharpVersion)</NuspecProperties>
     </PropertyGroup>
   </Target>
 </Project>

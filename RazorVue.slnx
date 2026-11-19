@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/Jazor.RazorVue/Jazor.RazorVue.csproj" />
+  <Project Path="src/Jazor.RazorVue.Sg.Test/Jazor.RazorVue.Sg.Test.csproj" />
+  <Project Path="src/Jazor.Vue/Jazor.Vue.csproj" />
+</Solution>

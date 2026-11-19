@@ -203,7 +203,7 @@ static string RequireRepoRoot()
 {
     for (var directory = new DirectoryInfo(Directory.GetCurrentDirectory()); directory is not null; directory = directory.Parent)
     {
-        if (File.Exists(Path.Combine(directory.FullName, "Jazor.slnx")))
+        if (File.Exists(Path.Combine(directory.FullName, "RazorVue.slnx")))
             return directory.FullName;
     }
 

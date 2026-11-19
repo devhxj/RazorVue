@@ -1,0 +1,81 @@
+name: RazorVue verification and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - id: version
+        shell: pwsh
+        run: |
+          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.Substring(1) } else { '0.0.0-ci.' + $env:GITHUB_RUN_ID }
+          "value=$version" >> $env:GITHUB_OUTPUT
+      - name: Verify Razor source generation and runtime coverage
+        run: dotnet run --file scripts/csharp/verify-razorvue-coverage.cs
+      - name: Pack against the public Jazor SDK
+        run: dotnet run --file scripts/csharp/pack-release.cs -- ${{ steps.version.outputs.value }}
+      - name: Verify Admin components
+        run: dotnet test src/Jazor.Admin.Test/Jazor.Admin.Test.csproj -p:RazorVuePackageVersion=${{ steps.version.outputs.value }} "-p:RestoreAdditionalProjectSources=${{ github.workspace }}/artifacts/packages"
+      - name: Verify packaged SPA in Chrome
+        run: dotnet run --file samples/RazorVue.Authoring/verify-smoke.cs -- --configuration Release --package-output artifacts/packages
+      - name: Verify packaged SSR and hydration in Chrome
+        run: dotnet run --file scripts/csharp/verify-windows-ssr-release.cs -- --package-source artifacts/packages --path-base /todo --browser-startup-timeout-seconds 45
+      - uses: actions/upload-artifact@v4
+        with:
+          name: razorvue-packages
+          path: |
+            artifacts/packages/Jazor.Vue.*.nupkg
+            artifacts/packages/Jazor.Admin.*.nupkg
+          if-no-files-found: error
+
+  publish:
+    if: github.ref_type == 'tag'
+    needs: verify
+    runs-on: windows-latest
+    environment: production
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: razorvue-packages
+          path: packages
+      - uses: NuGet/login@v1
+        id: nuget
+        with:
+          user: ${{ secrets.NUGET_USER }}
+      - name: Publish RazorVue packages
+        env:
+          NUGET_TEMPORARY_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
+        run: |
+          foreach ($package in Get-ChildItem packages/*.nupkg) {
+            dotnet nuget push $package.FullName --api-key $env:NUGET_TEMPORARY_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PACKAGE_VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          $arguments = @('release', 'create', $env:GITHUB_REF_NAME, '--repo', $env:GITHUB_REPOSITORY, '--generate-notes', '--verify-tag')
+          if ($env:PACKAGE_VERSION.Contains('-')) { $arguments += '--prerelease' }
+          gh @arguments

@@ -8,68 +8,12 @@ public sealed class RazorVueCatalogOwnershipTests
     {
         var repositoryRoot = FindRepositoryRoot();
         var catalogDirectory = Path.Combine(repositoryRoot, "src", "Jazor.RazorVue", "RazorSdk", "Catalog");
-        var clrDirectory = Path.Combine(repositoryRoot, "src", "Jazor.CLR");
 
         var catalogSources = Directory.Exists(catalogDirectory)
             ? Directory.EnumerateFiles(catalogDirectory, "*.cs", SearchOption.AllDirectories).ToArray()
             : [];
         Assert.HasCount(0, catalogSources, "RazorVue must not retain a CLR whitelist catalog.");
 
-        var sourceRoots = File.ReadAllText(Path.Combine(repositoryRoot, "src", "Jazor.Compiler.Generator", "SharedGeneration.cs"));
-        Assert.IsFalse(sourceRoots.Contains("Path.Combine(src, \"Jazor.RazorVue\", \"RazorSdk\", \"Catalog\")", StringComparison.Ordinal));
-
-        var clrModules = Directory.EnumerateFiles(Path.Combine(clrDirectory, "module"), "*.cs", SearchOption.TopDirectoryOnly)
-            .Select(path => Path.GetFileName(path))
-            .ToHashSet(StringComparer.Ordinal);
-
-        CollectionAssert.IsSubsetOf(
-            new[]
-            {
-                "ComponentBaseModule.cs",
-                "EventCallbackModule.cs",
-                "EventCallbackT1Module.cs",
-                "EventCallbackFactoryModule.cs",
-                "RenderFragmentModule.cs",
-                "RenderFragmentT1Module.cs",
-                "MarkupStringModule.cs",
-                "ParameterViewModule.cs",
-                "RenderTreeBuilderModule.cs",
-                "WebRenderTreeBuilderExtensionsModule.cs",
-                "ChangeEventArgsModule.cs",
-                "ElementReferenceModule.cs",
-                "ElementReferenceExtensionsModule.cs",
-                "MouseEventArgsModule.cs",
-                "KeyboardEventArgsModule.cs",
-                "FocusEventArgsModule.cs",
-                "PointerEventArgsModule.cs",
-                "WheelEventArgsModule.cs",
-                "DragEventArgsModule.cs",
-                "DataTransferModule.cs",
-                "ClipboardEventArgsModule.cs",
-                "TouchEventArgsModule.cs",
-                "TouchPointModule.cs",
-                "ErrorEventArgsModule.cs",
-                "ProgressEventArgsModule.cs",
-            },
-            clrModules.ToArray());
-
-        var clrDocs = Directory.EnumerateFiles(Path.Combine(clrDirectory, "doc"), "*.md", SearchOption.TopDirectoryOnly)
-            .Select(path => Path.GetFileName(path))
-            .ToHashSet(StringComparer.Ordinal);
-        CollectionAssert.IsSubsetOf(
-            new[]
-            {
-                "PointerEventArgsModule.md",
-                "WheelEventArgsModule.md"
-                 ,"DragEventArgsModule.md",
-                "DataTransferModule.md",
-                "ClipboardEventArgsModule.md",
-                "TouchEventArgsModule.md",
-                "TouchPointModule.md",
-                "ErrorEventArgsModule.md",
-                "ProgressEventArgsModule.md"
-            },
-            clrDocs.ToArray());
     }
 
     private static string FindRepositoryRoot()
@@ -78,7 +22,7 @@ public sealed class RazorVueCatalogOwnershipTests
              directory is not null;
              directory = directory.Parent)
         {
-            if (File.Exists(Path.Combine(directory.FullName, "Jazor.slnx")))
+            if (File.Exists(Path.Combine(directory.FullName, "RazorVue.slnx")))
                 return directory.FullName;
         }
 

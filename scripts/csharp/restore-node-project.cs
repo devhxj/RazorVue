@@ -2,7 +2,7 @@
 #:property AssemblyName=Jazor.NodeApiVerification
 #:property CETCompat=false
 #:property PublishAot=false
-#:project ../../src/Jazor.NodeHost/Jazor.NodeHost.csproj
+#:package Jazor@2.1.0-preview.5
 
 using Jazor.NodeHost;
 
@@ -12,9 +12,9 @@ if (args.Length == 0)
     throw new ArgumentException("Usage: dotnet run --file scripts/csharp/restore-node-project.cs -- <project-directory> [...]");
 
 var repository = new DirectoryInfo(Directory.GetCurrentDirectory());
-while (repository is not null && !File.Exists(Path.Combine(repository.FullName, "Jazor.slnx")))
+while (repository is not null && !File.Exists(Path.Combine(repository.FullName, "RazorVue.slnx")))
     repository = repository.Parent;
-var repoRoot = repository?.FullName ?? throw new InvalidOperationException("Cannot locate Jazor.slnx.");
+var repoRoot = repository?.FullName ?? throw new InvalidOperationException("Cannot locate RazorVue.slnx.");
 var store = Environment.GetEnvironmentVariable("JazorPnpmStoreDirectory") ?? Path.Combine(repoRoot, ".tmp", "nodeapi-store");
 
 foreach (var project in args)

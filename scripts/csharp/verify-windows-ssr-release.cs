@@ -2,7 +2,7 @@
 #:property AssemblyName=Jazor.NodeApiVerification
 #:property CETCompat=false
 #:property PublishAot=false
-#:project ../../src/Jazor.NodeHost/Jazor.NodeHost.csproj
+#:package Jazor@2.1.0-preview.5
 
 using Jazor.NodeHost;
 using System.Diagnostics;
@@ -10,7 +10,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using System.Xml.Linq;
 
-// Windows SSR release consumer gate: packages Jazor locally, publishes the RazorVue TodoList
+// Windows SSR release consumer gate: publishes the RazorVue TodoList
 // sample as an isolated NuGet consumer with JazorSSR=true, and verifies the published app
 // end to end. NodeApi renders from the self-contained SSR bundle and ASP.NET Core serves the
 // published browser closure, including a configured public PathBase.
@@ -43,29 +43,9 @@ try
     DeleteDirectoryWithinRepo(repoRoot, workRoot);
     Directory.CreateDirectory(workRoot);
 
-    if (options.PackPackages)
-    {
-        DeleteDirectoryWithinRepo(repoRoot, packageRoot);
-        Directory.CreateDirectory(packageRoot);
-
-        await RunDotNetAsync(
-            [
-                "run",
-                "--file",
-                Path.Combine("scripts", "csharp", "publish-nuget.cs"),
-                "--",
-                "--configuration",
-                "Release",
-                "--output-directory",
-                packageRoot,
-                "--skip-push"
-            ],
-            repoRoot,
-            dotnetCliHome);
-    }
-
-    var packageVersion = PackageVerifier.ResolveSharedPackageVersion(packageRoot);
-    PackageVerifier.VerifyRequiredPackages(packageRoot, packageVersion);
+    var packageVersion = PackageVerifier.ReadPackageVersion(packageRoot, "Jazor");
+    var razorVueVersion = PackageVerifier.ReadPackageVersion(packageRoot, "Jazor.Vue");
+    PackageVerifier.VerifyRequiredPackages(packageRoot, packageVersion, razorVueVersion);
 
     // Copy the source tree first: the sample ships its own Directory.Build.props that only
     // forwards to the shared samples props, and that unconditional import breaks a detached
@@ -87,14 +67,14 @@ try
             "/p:BuildInParallel=false",
             "/nr:false",
             "-p:UseSharedCompilation=false",
-            "-p:TodoUsePackages=true",
             "-p:JazorMode=release",
             "-p:JazorSSR=true",
             "-p:RestoreSources=" + packageRoot,
             "-p:RestoreAdditionalProjectSources=https://api.nuget.org/v3/index.json",
             "-p:RestorePackagesPath=" + restorePackagesRoot,
             "-p:RestoreForce=true",
-            "-p:JazorPackageVersion=" + packageVersion
+            "-p:JazorPackageVersion=" + packageVersion,
+            "-p:RazorVuePackageVersion=" + razorVueVersion
         ],
         consumerRoot,
         dotnetCliHome);
@@ -475,7 +455,6 @@ void AssertDetachedConsumer(string consumerRoot, string workRoot)
 {
     var hostProject = Path.Combine(consumerRoot, "Todo.Host", "Todo.Host.csproj");
     var projectText = File.ReadAllText(hostProject);
-    if (!projectText.Contains("TodoUsePackages", StringComparison.Ordinal) ||
         !projectText.Contains("PackageReference Include=\"Jazor\"", StringComparison.Ordinal))
     {
         throw new InvalidOperationException("Copied Todo.Host does not expose the package-consumer configuration.");
@@ -483,7 +462,6 @@ void AssertDetachedConsumer(string consumerRoot, string workRoot)
 
     var libraryProject = Path.Combine(consumerRoot, "Todo.Library", "Todo.Library.csproj");
     var libraryText = File.ReadAllText(libraryProject);
-    if (!libraryText.Contains("TodoUsePackages", StringComparison.Ordinal) ||
         !libraryText.Contains("PackageReference Include=\"Jazor\"", StringComparison.Ordinal) ||
         !libraryText.Contains("PackageReference Include=\"Jazor.Vue\"", StringComparison.Ordinal))
     {
@@ -552,13 +530,13 @@ string RequireRepoRoot()
 {
     for (var directory = new DirectoryInfo(Directory.GetCurrentDirectory()); directory is not null; directory = directory.Parent)
     {
-        if (File.Exists(Path.Combine(directory.FullName, "Jazor.slnx")))
+        if (File.Exists(Path.Combine(directory.FullName, "RazorVue.slnx")))
         {
             return directory.FullName;
         }
     }
 
-    throw new InvalidOperationException("Repository root containing Jazor.slnx was not found.");
+    throw new InvalidOperationException("Repository root containing RazorVue.slnx was not found.");
 }
 
 string ResolvePath(string repoRoot, string path)
@@ -618,7 +596,6 @@ bool IsExcluded(string relativePath)
 
 internal sealed record VerificationOptions(
     string PackageSource,
-    bool PackPackages,
     string PathBase,
     int Port,
     int CdpPort,
@@ -629,7 +606,6 @@ internal sealed record VerificationOptions(
     public static VerificationOptions Parse(IReadOnlyList<string> arguments)
     {
         var packageSource = Path.Combine("artifacts", "packages");
-        var packPackages = true;
         var pathBase = "/todo";
         var port = 4297;
         var cdpPort = 9337;
@@ -643,9 +619,6 @@ internal sealed record VerificationOptions(
             {
                 case "--package-source":
                     packageSource = RequireValue(arguments, ref index, "--package-source");
-                    break;
-                case "--skip-pack":
-                    packPackages = false;
                     break;
                 case "--path-base":
                     pathBase = RequireValue(arguments, ref index, "--path-base");
@@ -677,7 +650,6 @@ internal sealed record VerificationOptions(
 
         return new VerificationOptions(
             packageSource,
-            packPackages,
             NormalizePathBase(pathBase),
             port,
             cdpPort,
@@ -716,7 +688,6 @@ internal sealed record VerificationOptions(
         Console.WriteLine("Usage: dotnet run --file scripts/csharp/verify-windows-ssr-release.cs -- [options]");
         Console.WriteLine("Options:");
         Console.WriteLine("  --package-source <path>                 Default: artifacts/packages");
-        Console.WriteLine("  --skip-pack                             Consume packages already in --package-source");
         Console.WriteLine("  --path-base </todo>                     Default: /todo");
         Console.WriteLine("  --port <number>                         Default: 4297");
         Console.WriteLine("  --cdp-port <number>                     Default: 9337");
@@ -728,86 +699,25 @@ internal sealed record VerificationOptions(
 
 internal static class PackageVerifier
 {
-    // Keep this list aligned with publish-nuget.cs' DefaultPublicPackageIds. The
-    // consumer gate must fail when a package is omitted from the release artifact,
-    // even if the sample itself only exercises the three core references.
-    private static readonly string[] RequiredPackageIds =
-    [
-        "Jazor",
-        "Jazor.Vue",
-        "ECMAScript.Style",
-        "Jazor.Admin",
-        "ECMAScript.Vue.Devtools",
-        "ECMAScript.VueDataUi",
-        "ECMAScript.Lucide",
-        "ECMAScript.Pinia",
-        "ECMAScript.Pinia.Testing",
-        "ECMAScript.VueRoute",
-        "ECMAScript.DateFns",
-        "ECMAScript.VueUse",
-        "ECMAScript.FloatingUi",
-        "ECMAScript.VeeValidate",
-        "ECMAScript.VueI18n",
-        "ECMAScript.VueQuery",
-        "ECMAScript.Monaco",
-        "ECMAScript.VueDraggable",
-        "ECMAScript.FilePond",
-        "ECMAScript.WangEditor",
-        "ECMAScript.Vuetify",
-        "ECMAScript.ElementPlus",
-        "ECMAScript.TDesign"
-    ];
+    public static string ReadPackageVersion(string packageRoot, string packageId)
+        => ReadPackageVersion(FindPackage(packageRoot, packageId));
 
-    public static string ResolveSharedPackageVersion(string packageRoot)
+    public static void VerifyRequiredPackages(string packageRoot, string sdkVersion, string razorVueVersion)
     {
-        if (!Directory.Exists(packageRoot))
-        {
-            throw new DirectoryNotFoundException("Package source directory was not found: " + packageRoot);
-        }
+        using var sdk = ZipFile.OpenRead(FindPackage(packageRoot, "Jazor").FullName);
+        RequireEntry(sdk, "tools/net11.0/Jazor.Emit.dll", "Jazor");
 
-        var versions = RequiredPackageIds
-            .Select(packageId => FindPackage(packageRoot, packageId))
-            .Select(ReadPackageVersion)
-            .Distinct(StringComparer.Ordinal)
-            .ToArray();
+        using var vue = ZipFile.OpenRead(FindPackage(packageRoot, "ECMAScript.Vue").FullName);
+        RequireEntry(vue, "lib/net11.0/ECMAScript.VueContract.dll", "ECMAScript.Vue");
+        RequireEntry(vue, "jazor/vue3/manifest.json", "ECMAScript.Vue");
+        if (ReadPackageVersion(packageRoot, "ECMAScript.Vue") != sdkVersion)
+            throw new InvalidOperationException("Jazor and ECMAScript.Vue must use the same SDK version.");
 
-        return versions.Length == 1
-            ? versions[0]
-            : throw new InvalidOperationException("Required local packages do not have one shared version: " + string.Join(", ", versions));
-    }
-
-    public static void VerifyRequiredPackages(string packageRoot, string version)
-    {
-        foreach (var packageId in RequiredPackageIds)
-        {
-            var packageFile = FindPackage(packageRoot, packageId);
-            var packageVersion = ReadPackageVersion(packageFile);
-            if (!packageVersion.Equals(version, StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException($"Package '{packageId}' has version '{packageVersion}', expected '{version}'.");
-            }
-
-            using var archive = ZipFile.OpenRead(packageFile.FullName);
-            if (packageId == "Jazor")
-            {
-                RequireEntry(archive, "build/Jazor.props", packageId);
-                RequireEntry(archive, "build/Jazor.targets", packageId);
-                RequireEntry(archive, "buildTransitive/Jazor.Resources.targets", packageId);
-                RequireEntry(archive, "tools/net11.0/Jazor.Emit.dll", packageId);
-                RequireEntry(archive, "lib/net11.0/Jazor.AspNetCore.dll", packageId);
-                RequireEntry(archive, "lib/net11.0/Jazor.AspNetCore.Dev.dll", packageId);
-            }
-            else if (packageId == "Jazor.Vue")
-            {
-                RequireEntry(archive, "buildTransitive/Jazor.Vue.targets", packageId);
-                RequireEntry(archive, "tools/net11.0/analyzers/Jazor.RazorVue.dll", packageId);
-                RequireEntry(archive, "jazor/vue3/manifest.json", packageId);
-            }
-            else
-            {
-                RequireEntry(archive, "lib/net11.0/" + packageId + ".dll", packageId);
-            }
-        }
+        using var razor = ZipFile.OpenRead(FindPackage(packageRoot, "Jazor.Vue").FullName);
+        RequireEntry(razor, "tools/net11.0/analyzers/Jazor.RazorVue.dll", "Jazor.Vue");
+        RequireEntry(razor, "jazor/vue-runtime/manifest.json", "Jazor.Vue");
+        if (ReadPackageVersion(packageRoot, "Jazor.Admin") != razorVueVersion)
+            throw new InvalidOperationException("Jazor.Vue and Jazor.Admin must use the same RazorVue version.");
     }
 
     private static FileInfo FindPackage(string packageRoot, string packageId)

@@ -504,8 +504,7 @@ internal static class RazorSgOfficialNodeRuntimeTestHost
 
     private static IReadOnlyDictionary<string, string> ReadEcmascriptResourceModules()
     {
-        var repositoryRoot = FindRepositoryRoot();
-        var packageRoot = Path.Combine(repositoryRoot, "src", "ECMAScript");
+        var packageRoot = Path.Combine(AppContext.BaseDirectory, "Resources", "ecmascript");
         var manifestPath = Path.Combine(packageRoot, "manifest.json");
         if (!File.Exists(manifestPath))
             throw new FileNotFoundException("The ECMAScript JS-resource manifest was not found.", manifestPath);
@@ -589,7 +588,7 @@ internal static class RazorSgOfficialNodeRuntimeTestHost
     {
         for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
         {
-            if (File.Exists(Path.Combine(directory.FullName, "Jazor.slnx")))
+            if (File.Exists(Path.Combine(directory.FullName, "RazorVue.slnx")))
                 return directory.FullName;
         }
 

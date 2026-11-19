@@ -22,14 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\ECMAScript.Contract\GlobalUsings.cs" Link="Shared\GlobalUsings.cs" />
-    <Compile Include="..\ECMAScript.Contract\IsExternalInit.cs" Link="Shared\IsExternalInit.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Jazor.Common\Jazor.Common.csproj" />
-    <ProjectReference Include="..\Jazor.Compiler\Jazor.Compiler.csproj" />
-    <ProjectReference Include="..\ECMAScript.Contract\ECMAScript.Contract.csproj" />
+    <!-- Compile against the same netstandard assemblies that the Jazor SDK registers with Roslyn. -->
+    <PackageDownload Include="Jazor" Version="[$(JazorSdkVersion)]" />
   </ItemGroup>
 
 </Project>

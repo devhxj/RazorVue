@@ -9,9 +9,7 @@ public sealed class ProductionRazorCompilerReferenceTests
         var root = FindRepositoryRoot();
         var productionProjectPaths = new[]
         {
-            "src/Jazor.Analyzer/Jazor.Analyzer.csproj",
             "src/Jazor.RazorVue/Jazor.RazorVue.csproj",
-            "src/Jazor/Jazor.csproj"
         };
 
         foreach (var relativePath in productionProjectPaths)
@@ -33,15 +31,11 @@ public sealed class ProductionRazorCompilerReferenceTests
     public void RazorVueHook_IsPackagedOnlyByJazorVue()
     {
         var root = FindRepositoryRoot();
-        var jazorProject = File.ReadAllText(Path.Combine(root, "src", "Jazor", "Jazor.csproj"));
         var jazorVueProjectPath = Path.Combine(root, "src", "Jazor.Vue", "Jazor.Vue.csproj");
         var jazorVueProject = File.ReadAllText(jazorVueProjectPath);
         var jazorVueNuspecPath = Path.Combine(root, "src", "Jazor.Vue", "Jazor.Vue.nuspec");
         var jazorVueNuspec = File.ReadAllText(jazorVueNuspecPath);
 
-        Assert.IsFalse(
-            jazorProject.Contains("Jazor.RazorVue\\bin", StringComparison.Ordinal),
-            "Jazor must not package or install the Razor-to-Vue implementation and generator hook.");
         StringAssert.Contains(jazorVueProject, "<PackageId>Jazor.Vue</PackageId>");
         StringAssert.Contains(jazorVueProject, "<NuspecFile>Jazor.Vue.nuspec</NuspecFile>");
         StringAssert.Contains(jazorVueNuspec, "Jazor.RazorVue.dll");
@@ -122,55 +116,17 @@ public sealed class ProductionRazorCompilerReferenceTests
     public void LoweringSources_DoNotRoundTripGeneratedJavaScriptThroughTextOrParser()
     {
         var root = FindRepositoryRoot();
-        var compilerRoot = Path.Combine(root, "src", "Jazor.Compiler");
         var razorVueRoot = Path.Combine(root, "src", "Jazor.RazorVue");
-
-        var parserCallSites = Directory
-            .EnumerateFiles(compilerRoot, "*.cs", SearchOption.AllDirectories)
-            .SelectMany(path => File.ReadLines(path).Select((line, index) => new SourceLine(path, index + 1, line)))
-            .Where(static sourceLine =>
-                sourceLine.Text.Contains("new Parser(", StringComparison.Ordinal) ||
-                sourceLine.Text.Contains(".ParseExpression(", StringComparison.Ordinal) ||
-                sourceLine.Text.Contains(".ParseModule(", StringComparison.Ordinal))
-            .ToArray();
-
-        Assert.AreEqual(2, parserCallSites.Length, DescribeSourceLines(parserCallSites));
-        Assert.IsTrue(
-            parserCallSites.All(static sourceLine =>
-                sourceLine.Path.EndsWith("SemanticWalker.cs.InlineTemplate.cs", StringComparison.OrdinalIgnoreCase)),
-            "Only the explicit authored Inline template boundary may parse JavaScript.\n" + DescribeSourceLines(parserCallSites));
-
-        var astSourceLines = Directory
-            .EnumerateFiles(compilerRoot, "*.cs", SearchOption.AllDirectories)
-            .Concat(Directory.EnumerateFiles(razorVueRoot, "*.cs", SearchOption.AllDirectories))
-            .SelectMany(path => File.ReadLines(path).Select((line, index) => new SourceLine(path, index + 1, line)))
-            .ToArray();
-        var directStringLiteralConstruction = astSourceLines
-            .Where(static sourceLine =>
-                sourceLine.Text.Contains("new StringLiteral(", StringComparison.Ordinal) ||
-                sourceLine.Text.Contains("EscapeJavaScriptString", StringComparison.Ordinal))
-            .ToArray();
-        Assert.AreEqual(1, directStringLiteralConstruction.Length, DescribeSourceLines(directStringLiteralConstruction));
-        Assert.IsTrue(
-            directStringLiteralConstruction[0].Path.EndsWith("JavaScriptAstFactory.cs", StringComparison.OrdinalIgnoreCase),
-            "Production lowering must create escaped string literal AST nodes through JavaScriptAstFactory.\n" +
-            DescribeSourceLines(directStringLiteralConstruction));
-
-        var compilerSemanticSerialization = Directory
-            .EnumerateFiles(compilerRoot, "*.cs", SearchOption.AllDirectories)
-            .Where(static path => !path.EndsWith("Util.cs", StringComparison.OrdinalIgnoreCase))
-            .Where(static path => !path.EndsWith("ESGenerator.cs", StringComparison.OrdinalIgnoreCase))
-            .SelectMany(path => File.ReadLines(path).Select((line, index) => new SourceLine(path, index + 1, line)))
-            .Where(static sourceLine =>
-                sourceLine.Text.Contains(".ToECMAScript(", StringComparison.Ordinal) ||
-                sourceLine.Text.Contains(".ToKnRECMAScript(", StringComparison.Ordinal))
-            .ToArray();
-        Assert.AreEqual(0, compilerSemanticSerialization.Length, DescribeSourceLines(compilerSemanticSerialization));
 
         var razorVueSources = Directory
             .EnumerateFiles(razorVueRoot, "*.cs", SearchOption.AllDirectories)
             .SelectMany(path => File.ReadLines(path).Select((line, index) => new SourceLine(path, index + 1, line)))
             .ToArray();
+
+        Assert.IsFalse(razorVueSources.Any(static sourceLine =>
+            sourceLine.Text.Contains("new StringLiteral(", StringComparison.Ordinal) ||
+            sourceLine.Text.Contains("EscapeJavaScriptString", StringComparison.Ordinal)),
+            "RazorVue creates string literal nodes through Jazor's JavaScriptAstFactory.");
         var retiredTextLoweringTokens = new[]
         {
             "compiledScript",
@@ -277,7 +233,7 @@ public sealed class ProductionRazorCompilerReferenceTests
         var current = AppContext.BaseDirectory;
         while (!string.IsNullOrWhiteSpace(current))
         {
-            if (File.Exists(Path.Combine(current, "Jazor.slnx")))
+            if (File.Exists(Path.Combine(current, "RazorVue.slnx")))
                 return current;
 
             var parent = Directory.GetParent(current);
@@ -287,7 +243,7 @@ public sealed class ProductionRazorCompilerReferenceTests
             current = parent.FullName;
         }
 
-        throw new InvalidOperationException("Repository root containing Jazor.slnx could not be located.");
+        throw new InvalidOperationException("Repository root containing RazorVue.slnx could not be located.");
     }
 
     private readonly record struct SourceLine(string Path, int Line, string Text);

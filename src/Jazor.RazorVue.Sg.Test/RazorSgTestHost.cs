@@ -179,7 +179,7 @@ internal static class RazorSgTestHost
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            if (File.Exists(Path.Combine(directory.FullName, "Jazor.slnx")))
+            if (File.Exists(Path.Combine(directory.FullName, "RazorVue.slnx")))
                 return directory.FullName;
 
             directory = directory.Parent;

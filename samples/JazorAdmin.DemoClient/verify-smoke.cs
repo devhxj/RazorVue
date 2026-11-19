@@ -431,12 +431,12 @@ static string FindRepositoryRoot(string startDirectory)
     var current = new DirectoryInfo(Path.GetFullPath(startDirectory));
     while (current is not null)
     {
-        if (File.Exists(Path.Combine(current.FullName, "Jazor.slnx")))
+        if (File.Exists(Path.Combine(current.FullName, "RazorVue.slnx")))
             return current.FullName;
         current = current.Parent;
     }
 
-    throw new InvalidOperationException("Cannot locate repository root (Jazor.slnx).");
+    throw new InvalidOperationException("Cannot locate repository root (RazorVue.slnx).");
 }
 
 static void EnsureDirectoryWithinRepo(string path, string repoRoot)

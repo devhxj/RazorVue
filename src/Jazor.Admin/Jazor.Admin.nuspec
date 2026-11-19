@@ -10,10 +10,10 @@
     <readme>$packageReadmeFile$</readme>
     <dependencies>
       <group targetFramework="net11.0">
-        <dependency id="Jazor" version="$dependencyVersion$" exclude="Build,Analyzers" />
+        <dependency id="Jazor" version="[$jazorSdkVersion$]" exclude="Build,Analyzers" />
         <dependency id="Jazor.Vue" version="$dependencyVersion$" exclude="Build,Analyzers" />
-        <dependency id="ECMAScript.Style" version="$dependencyVersion$" />
-        <dependency id="ECMAScript.VueRoute" version="$dependencyVersion$" />
+        <dependency id="ECMAScript.Style" version="[$jazorSdkVersion$]" />
+        <dependency id="ECMAScript.VueRoute" version="[$jazorSdkVersion$]" />
       </group>
     </dependencies>
     <frameworkReferences>

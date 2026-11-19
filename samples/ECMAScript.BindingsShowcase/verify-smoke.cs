@@ -2,7 +2,7 @@
 #:property AssemblyName=Jazor.NodeApiVerification
 #:property CETCompat=false
 #:property PublishAot=false
-#:project ../../src/Jazor.NodeHost/Jazor.NodeHost.csproj
+#:package Jazor@2.1.0-preview.5
 
 using Jazor.NodeHost;
 using System.Diagnostics;
@@ -300,11 +300,11 @@ static string FindRepositoryRoot()
 {
     for (var directory = new DirectoryInfo(Directory.GetCurrentDirectory()); directory is not null; directory = directory.Parent)
     {
-        if (File.Exists(Path.Combine(directory.FullName, "Jazor.slnx")))
+        if (File.Exists(Path.Combine(directory.FullName, "RazorVue.slnx")))
             return directory.FullName;
     }
 
-    throw new InvalidOperationException("Run from the repository root (Jazor.slnx not found).");
+    throw new InvalidOperationException("Run from the repository root (RazorVue.slnx not found).");
 }
 
 static void RequireEqual(string expected, string? actual, string description)
