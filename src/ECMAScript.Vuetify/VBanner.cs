@@ -1,4 +1,3 @@
-using ECMAScript.VueContract;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 

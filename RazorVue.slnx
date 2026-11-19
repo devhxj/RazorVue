@@ -2,6 +2,7 @@
   <Project Path="src/Jazor.RazorVue/Jazor.RazorVue.csproj" />
   <Project Path="src/Jazor.RazorVue.Sg.Test/Jazor.RazorVue.Sg.Test.csproj" />
   <Project Path="src/Jazor.Vue/Jazor.Vue.csproj" />
+  <Project Path="src/ECMAScript.VueContract/ECMAScript.VueContract.csproj" />
   <Project Path="src/ECMAScript.ElementPlus/ECMAScript.ElementPlus.csproj" />
   <Project Path="src/ECMAScript.FilePond/ECMAScript.FilePond.csproj" />
   <Project Path="src/ECMAScript.FilePond.Test/ECMAScript.FilePond.Test.csproj" />

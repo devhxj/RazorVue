@@ -24,6 +24,7 @@
     <ProjectReference Include="../ECMAScript.Vuetify/ECMAScript.Vuetify.csproj" />
     <PackageReference Include="ECMAScript.Style" Version="$(JazorSdkVersion)" />
     <ProjectReference Include="..\Jazor.RazorVue\Jazor.RazorVue.csproj" />
+    <ProjectReference Include="..\Jazor.Vue\Jazor.Vue.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>

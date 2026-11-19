@@ -13,6 +13,7 @@
       <group targetFramework="net11.0">
         <dependency id="Jazor" version="[$jazorSdkVersion$]" exclude="Build,Analyzers" />
         <dependency id="ECMAScript.Vue" version="[$jazorSdkVersion$]" />
+        <dependency id="ECMAScript.VueRoute" version="[$jazorSdkVersion$]" />
       </group>
     </dependencies>
     <frameworkReferences>
@@ -25,6 +26,12 @@
     <file src="$projectDir$README.md" target="" />
     <file src="$projectDir$..\..\LICENSE.txt" target="LICENSE.txt" />
     <file src="$projectDir$..\..\NOTICE.txt" target="NOTICE.txt" />
+    <file src="$buildOutputDir$Jazor.Vue.dll" target="lib/net11.0" />
+    <file src="$buildOutputDir$Jazor.Vue.pdb" target="lib/net11.0" />
+    <file src="$buildOutputDir$Jazor.Vue.xml" target="lib/net11.0" />
+    <file src="$buildOutputRoot$ECMAScript.VueContract\bin\$configuration$\netstandard2.0\ECMAScript.VueContract.dll" target="lib/net11.0" />
+    <file src="$buildOutputRoot$ECMAScript.VueContract\bin\$configuration$\netstandard2.0\ECMAScript.VueContract.pdb" target="lib/net11.0" />
+    <file src="$buildOutputRoot$ECMAScript.VueContract\bin\$configuration$\netstandard2.0\ECMAScript.VueContract.xml" target="lib/net11.0" />
     <file src="$projectDir$buildTransitive\Jazor.Vue.targets" target="buildTransitive\Jazor.Vue.targets" />
     <file src="$projectDir$..\Jazor\build\Jazor.CompilationTiming.targets" target="buildTransitive\Jazor.CompilationTiming.targets" />
     <file src="$buildOutputRoot$Jazor.RazorVue\bin\$configuration$\netstandard2.0\Jazor.RazorVue.dll" target="tools/net11.0/analyzers" />

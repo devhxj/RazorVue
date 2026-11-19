@@ -2,6 +2,8 @@
 
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Xml.Linq;
 
 var root = Directory.GetCurrentDirectory();
@@ -48,6 +50,7 @@ foreach (var (id, library, license) in componentPackages)
 }
 
 await PackAsync("Jazor.Vue");
+VerifyRazorContractAssembly();
 await PackAsync("Jazor.Admin");
 await VerifyInteractionPackageConsumerAsync();
 
@@ -92,6 +95,24 @@ void VerifyComponentPackage(string id, string library, string license)
     Console.WriteLine($"Verified {id} {version} against SDK {sdkVersion}.");
 }
 
+void VerifyRazorContractAssembly()
+{
+    using var package = ZipFile.OpenRead(Path.Combine(feed, $"Jazor.Vue.{version}.nupkg"));
+    var assembly = package.GetEntry("lib/net11.0/ECMAScript.VueContract.dll")
+        ?? throw new InvalidOperationException("Jazor.Vue is missing ECMAScript.VueContract.dll.");
+    using var image = new MemoryStream();
+    using (var entry = assembly.Open())
+        entry.CopyTo(image);
+    image.Position = 0;
+    using var pe = new PEReader(image);
+    var metadata = pe.GetMetadataReader();
+    var definition = metadata.GetAssemblyDefinition();
+    if (metadata.GetString(definition.Name) != "ECMAScript.VueContract"
+        || definition.Version != new Version(1, 0, 0, 0)
+        || !definition.PublicKey.IsNil)
+        throw new InvalidOperationException("The packaged VueContract assembly identity changed.");
+}
+
 Task PackAsync(string project)
     => RunDotnetAsync(
     [
@@ -126,10 +147,12 @@ async Task VerifyInteractionPackageConsumerAsync()
                 new XElement("JazorDir", output)),
             new XElement("ItemGroup", packageReferences)).Save(project);
         await File.WriteAllTextAsync(Path.Combine(workspace.FullName, "Program.cs"),
-            """System.Console.WriteLine("RazorVue interaction package consumer");""");
+            """System.Console.WriteLine(typeof(ECMAScript.VueContract.VueInjectAttribute).FullName);""");
         await File.WriteAllTextAsync(Path.Combine(workspace.FullName, "InteractionBindings.razor"), """
             @using ECMAScript
             @using static ECMAScript.Vue
+            @using Microsoft.AspNetCore.Components
+            @using Microsoft.AspNetCore.Components.Web
             @implements IVueComponent
             @attribute [ECMAScriptModule("./components/interaction-bindings")]
 
@@ -138,9 +161,16 @@ async Task VerifyInteractionPackageConsumerAsync()
                 <div>@context</div>
             </VueDraggableList>
             <WangEditorComponent ModelValue="initial" />
+            <VueRouterLink To="@Home">Home</VueRouterLink>
+            <VueRouterView />
+            <input @onchange="ReadNativeEvent" />
+            <span>@EventType</span>
 
             @code {
                 private IVueRef<string[]> Items { get; } = Vue.Ref(new[] { "first" });
+                private RouteLocationRaw Home => "/";
+                private string EventType { get; set; } = "";
+                private void ReadNativeEvent(ChangeEventArgs args) => EventType = args.NativeEvent.Type;
             }
             """);
 
@@ -154,13 +184,13 @@ async Task VerifyInteractionPackageConsumerAsync()
 
         var module = Path.Combine(output, "components", "interaction-bindings.js");
         var contents = await File.ReadAllTextAsync(module);
-        foreach (var specifier in new[] { "vue-filepond", "vue-draggable-plus", "@wangeditor/editor-for-vue" })
+        foreach (var specifier in new[] { "vue-filepond", "vue-draggable-plus", "@wangeditor/editor-for-vue", "vue-router" })
             if (!contents.Contains($"""from "{specifier}";""", StringComparison.Ordinal))
                 throw new InvalidOperationException($"The packaged Razor consumer did not import {specifier}.");
         if (!File.Exists(Path.Combine(output, "dist", "bundle.js")))
             throw new InvalidOperationException("The packaged Razor consumer did not produce a Vite bundle.");
 
-        Console.WriteLine("Verified packaged Razor authoring and Vite build for FilePond, VueDraggable, and WangEditor.");
+        Console.WriteLine("Verified packaged Razor component bindings, Router proxies, native events, and the Vite bundle.");
     }
     finally
     {

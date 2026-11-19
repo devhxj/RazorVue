@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using ECMAScript.VueContract;
 using Microsoft.AspNetCore.Components;
 using static ECMAScript.Vue;
 

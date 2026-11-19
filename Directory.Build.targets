@@ -7,6 +7,9 @@
     <Reference Include="Jazor.Compiler" HintPath="$(JazorAnalyzerDirectory)Jazor.Compiler.dll" />
     <Reference Include="ECMAScript.Contract" HintPath="$(JazorAnalyzerDirectory)ECMAScript.Contract.dll" />
   </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'ECMAScript.VueContract'">
+    <Reference Include="ECMAScript.Contract" HintPath="$(JazorAnalyzerDirectory)ECMAScript.Contract.dll" Private="false" />
+  </ItemGroup>
   <ItemGroup Condition="'$(MSBuildProjectName)' == 'ECMAScript.FilePond.Test' or '$(MSBuildProjectName)' == 'ECMAScript.VueDraggable.Test' or '$(MSBuildProjectName)' == 'ECMAScript.WangEditor.Test'">
     <Reference Include="Acornima" HintPath="$(JazorAnalyzerDirectory)Acornima.dll" />
     <Reference Include="Acornima.Extras" HintPath="$(JazorAnalyzerDirectory)Acornima.Extras.dll" />

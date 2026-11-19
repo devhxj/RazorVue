@@ -10,6 +10,8 @@
 
 ## 安装
 
+请按 [兼容性表](../../README.md#compatibility) 配对 `Jazor` 和 `Jazor.Vue` 的版本。2.2 的 `Jazor.Vue` 包提供 `VueRouterLink`、`VueRouterView`、Blazor 原生事件扩展和 `ECMAScript.VueContract.dll`。已有项目升级后请重编译使用这些类型的程序集。
+
 ```xml
 <ItemGroup>
   <PackageReference Include="Jazor" Version="2.0.0" />
@@ -54,4 +56,4 @@ Blazor framework CLR mapping 由 `Jazor.CLR.Generator` 从真实 ASP.NET Core re
 
 - [Jazor.RazorVue](../Jazor.RazorVue/README.md)
 - [安装与配置](https://github.com/devhxj/RazorVue#compatibility)
-- [Razor-to-Vue](https://github.com/devhxj/Jazor/blob/main/docs/02-architecture/razor-to-vue.md)
+- [RazorVue 作者指南](../../docs/03-guides/razorvue-authoring.md)

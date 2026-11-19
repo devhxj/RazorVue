@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Jazor.Vue ships this assembly under its original identity. -->
+    <IsPackable>false</IsPackable>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>ECMAScript.VueContract</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageDownload Include="Jazor" Version="[$(JazorSdkVersion)]" />
+  </ItemGroup>
+
+</Project>

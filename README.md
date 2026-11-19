@@ -27,6 +27,8 @@ A Razor authoring project references both Jazor and Jazor.Vue directly. Use the 
 
 The FilePond, VueDraggable, and WangEditor source is maintained here. The next standalone release is prepared against the shared SDK at 2.1.0-preview.6. [Preview 8 notes](docs/releases/v2.1.0-preview.8.md)
 
+The 2.2 migration moves the Razor Router components, Blazor event extensions, and Vue injection contracts into the `Jazor.Vue` package. Upgrade the shared packages and `Jazor.Vue` together and rebuild the projects that use the moved types. [2.2 migration notes](docs/releases/v2.2.0-preview.1.md)
+
 ```xml
 <ItemGroup>
   <PackageReference Include="Jazor" Version="2.1.0-preview.6" />
@@ -48,6 +50,8 @@ dotnet run --file samples/RazorVue.Authoring/verify-smoke.cs -- --configuration 
 dotnet run --file scripts/csharp/verify-windows-ssr-release.cs -- --package-source artifacts/packages --path-base /todo
 ```
 
-The two browser checks use Chrome on Windows. Packing also builds a standalone Razor project with the FilePond, VueDraggable, and WangEditor candidate packages. A v-prefixed Git tag sets the version of Jazor.Vue, Jazor.Admin, and all eight bindings. The publish workflow runs verification before NuGet Trusted Publishing. NuGet.org must authorize the repository, the `nuget-publish-ref.yml` workflow, and the production environment for every package ID.
+The two browser checks use Chrome on Windows. Packing also builds a standalone Razor project with the component bindings, Router proxies, native events, and Vue injection contracts. To verify an unpublished shared SDK, put the Jazor, ECMAScript.Vue, ECMAScript.VueRoute, and ECMAScript.Style candidate packages into one local feed and pass that directory as the second argument to `pack-release.cs`. Pass the same directory as `RestoreAdditionalProjectSources` when building the solution.
+
+A v-prefixed Git tag sets the version of Jazor.Vue, Jazor.Admin, and all eight bindings. The publish workflow runs verification before NuGet Trusted Publishing. NuGet.org must authorize the repository, the `nuget-publish-ref.yml` workflow, and the production environment for every package ID.
 
 The Razor compiler source history was extracted from [Jazor at preview 5](https://github.com/devhxj/Jazor/tree/v2.1.0-preview.5). The bindings carry their original source history.

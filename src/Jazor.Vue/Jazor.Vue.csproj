@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net11.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageId>Jazor.Vue</PackageId>
@@ -15,7 +18,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageTags>jazor;razor;vue;blazor;source-generator</PackageTags>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <NoWarn>$(NoWarn);CS0626;NU5128</NoWarn>
     <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == '' and '$(DOTNET_CLI_HOME)' != ''">$([System.IO.Path]::Combine('$(DOTNET_CLI_HOME)', '.nuget', 'packages'))\</NuGetPackageRoot>
     <NuGetPackageRoot Condition="'$(NuGetPackageRoot)' == '' and '$(UserProfile)' != ''">$([System.IO.Path]::Combine('$(UserProfile)', '.nuget', 'packages'))\</NuGetPackageRoot>
     <JazorVuePackageBuildOutputRoot Condition="'$(JazorVuePackageBuildOutputRoot)' == '' and '$(JazorIsolatedBaseOutputRoot)' != ''">$([MSBuild]::EnsureTrailingSlash('$(JazorIsolatedBaseOutputRoot)'))</JazorVuePackageBuildOutputRoot>
@@ -33,6 +36,10 @@
     <PackageReference Include="MinVer" Version="$(MinVerPackageVersion)" PrivateAssets="All" />
     <PackageReference Include="AngleSharp" Version="$(AngleSharpVersion)" GeneratePathProperty="true" PrivateAssets="all" />
     <PackageReference Include="Acornima.Extras" Version="$(AcornimaVersion)" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="Jazor" Version="$(JazorSdkVersion)" ExcludeAssets="build" />
+    <PackageReference Include="ECMAScript.Vue" Version="$(JazorSdkVersion)" />
+    <PackageReference Include="ECMAScript.VueRoute" Version="$(JazorSdkVersion)" />
+    <ProjectReference Include="..\ECMAScript.VueContract\ECMAScript.VueContract.csproj" />
   </ItemGroup>
 
   <ItemGroup>

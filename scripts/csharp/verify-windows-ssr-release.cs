@@ -707,13 +707,14 @@ internal static class PackageVerifier
         RequireEntry(sdk, "tools/net11.0/Jazor.Emit.dll", "Jazor");
 
         using var vue = ZipFile.OpenRead(FindPackage(packageRoot, "ECMAScript.Vue").FullName);
-        RequireEntry(vue, "lib/net11.0/ECMAScript.VueContract.dll", "ECMAScript.Vue");
         RequireEntry(vue, "jazor/vue3/manifest.json", "ECMAScript.Vue");
         if (ReadPackageVersion(packageRoot, "ECMAScript.Vue") != sdkVersion)
             throw new InvalidOperationException("Jazor and ECMAScript.Vue must use the same SDK version.");
 
         using var razor = ZipFile.OpenRead(FindPackage(packageRoot, "Jazor.Vue").FullName);
         RequireEntry(razor, "tools/net11.0/analyzers/Jazor.RazorVue.dll", "Jazor.Vue");
+        RequireEntry(razor, "lib/net11.0/Jazor.Vue.dll", "Jazor.Vue");
+        RequireEntry(razor, "lib/net11.0/ECMAScript.VueContract.dll", "Jazor.Vue");
         RequireEntry(razor, "jazor/vue-runtime/manifest.json", "Jazor.Vue");
         if (ReadPackageVersion(packageRoot, "Jazor.Admin") != razorVueVersion)
             throw new InvalidOperationException("Jazor.Vue and Jazor.Admin must use the same RazorVue version.");
